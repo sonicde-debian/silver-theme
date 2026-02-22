@@ -2,7 +2,7 @@ Source: silver-theme
 Section: kde
 Priority: optional
 Maintainer: NexusSfan <nexussfan@duck.com>
-Build-Depends: debhelper-compat (= 10)
+Build-Depends: debhelper-compat (= 10),
                git,
                build-essential,
                cmake,
