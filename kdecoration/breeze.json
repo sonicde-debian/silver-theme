@@ -1,0 +1,11 @@
+{
+    "KPlugin": {
+        "Description": "Customizable window decorations using the Silver, Kite, Breeze or Redmond visual styles for the Plasma Desktop",
+        "EnabledByDefault": true,
+        "Name": "Silver"
+    },
+    "X-KDE-ConfigModule": "kcm_silverdecoration",
+    "org.kde.kdecoration3": {
+        "recommendedBorderSize": "None"
+    }
+}
