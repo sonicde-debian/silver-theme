@@ -45,7 +45,7 @@ Vcs-Git: https://github.com/sonicde-debian/silver-theme.git
 Vcs-Browser: https://github.com/sonicde-debian/silver-theme
 Homepage: https://github.com/Sonic-DE/silver-theme
 
-Package: silver-theme
+Package: kde-style-silver
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: Silver Theme for KDE Plasma
