@@ -72,5 +72,4 @@ QVariant ExceptionModel::headerData(int section, Qt::Orientation orientation, in
     // return empty
     return QVariant();
 }
-
 }

@@ -64,5 +64,4 @@ private:
     //* animated
     bool _animated;
 };
-
 }

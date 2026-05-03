@@ -37,5 +37,4 @@ bool ToolBoxEngine::isAnimated(const QPaintDevice *object)
     const QPointer<WidgetStateData> data = ToolBoxEngine::data(object);
     return (data && data.data()->animation() && data.data()->animation().data()->isRunning());
 }
-
 }

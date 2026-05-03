@@ -96,5 +96,4 @@ private:
     //* if is in the process of loading
     bool m_loading = false;
 };
-
 }

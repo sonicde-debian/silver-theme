@@ -29,5 +29,4 @@ bool StackedWidgetEngine::registerWidget(QStackedWidget *widget)
 
     return true;
 }
-
 }

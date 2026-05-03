@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: 2014 Martin Gräßlin <mgraesslin@kde.org>
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
  * SPDX-FileCopyrightText: 2021 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -151,7 +152,7 @@ public:
     }
 
     //* set icon size
-    void setIconSize(const QSize &value)
+    void setIconSize(const QSizeF &value)
     {
         m_iconSize = value;
     }
@@ -183,7 +184,7 @@ private Q_SLOTS:
     void updateAnimationState(bool);
 
     //* get colour and trigger same in thin window outline
-    void updateThinWindowOutlineWithButtonColor(bool);
+    void updateWindowOutlineWithButtonColor(bool);
 
 private:
     //* private constructor
@@ -272,7 +273,7 @@ private:
     QSizeF m_smallButtonPaddedSize = QSizeF();
 
     //* icon size
-    QSize m_iconSize = QSize();
+    QSizeF m_iconSize = QSizeF();
 
     //* active state change opacity
     qreal m_opacity = 0;
@@ -287,6 +288,9 @@ private:
     qreal m_standardScaledCosmeticPenWidth = 1.0;
     mutable qreal m_standardScaledNonCosmeticPenWidth = 1.0;
     bool m_titlebarTextPinnedInversion = false;
+
+    // for unison hovering
+    bool hovered() const;
 };
 
 } // namespace

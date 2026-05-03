@@ -113,5 +113,4 @@ void StackedWidgetData::targetDestroyed()
     setEnabled(false);
     _target.clear();
 }
-
 }

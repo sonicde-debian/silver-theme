@@ -1,6 +1,7 @@
 /*
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
- * SPDX-FileCopyrightText: 2021-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2021-2025 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
@@ -14,6 +15,7 @@
 #include "breeze.h"
 #include "breezedecorationsettingsprovider.h"
 #include "breezepropertynames.h"
+#include "breezestyleconfigdata.h"
 #include "renderdecorationbuttonicon.h"
 #include "systemicontheme.h"
 
@@ -143,6 +145,14 @@ void Helper::loadConfig()
                                                    _systemActiveTitleBarTextColor,
                                                    _systemInactiveTitleBarTextColor,
                                                    colorSchemePath);
+
+        bool colorSchemeHasHeaderColor = KColorScheme::isColorSetSupported(_colorSchemeConfig, KColorScheme::Header);
+        if (_decorationConfig->matchTitleBarToApplicationColor() && !colorSchemeHasHeaderColor) {
+            _systemActiveTitleBarColor = palette.color(QPalette::ColorGroup::Active, QPalette::ColorRole::Window);
+            _systemInactiveTitleBarColor = palette.color(QPalette::ColorGroup::Inactive, QPalette::ColorRole::Window);
+            _systemActiveTitleBarTextColor = palette.color(QPalette::ColorGroup::Active, QPalette::ColorRole::WindowText);
+            _systemInactiveTitleBarTextColor = palette.color(QPalette::ColorGroup::Inactive, QPalette::ColorRole::WindowText);
+        }
 
         _decorationColors->generateDecorationColors(palette,
                                                     _decorationConfig,
@@ -1752,15 +1762,13 @@ void Helper::renderEllipseShadow(QPainter *painter, const QRectF &rect, const QC
 //______________________________________________________________________________
 bool Helper::isX11()
 {
-    static const bool s_isX11 = KWindowSystem::isPlatformX11();
-    return s_isX11;
+    return true;
 }
 
 //______________________________________________________________________________
 bool Helper::isWayland()
 {
-    static const bool s_isWayland = KWindowSystem::isPlatformWayland();
-    return s_isWayland;
+    return false;
 }
 
 //______________________________________________________________________________
@@ -1839,9 +1847,7 @@ QPainterPath Helper::roundedPath(const QRectF &rect, Corners corners, qreal radi
 bool Helper::compositingActive() const
 {
     if (isX11()) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        return KWindowSystem::compositingActive();
-#elif __has_include(<KX11Extras>)
+#if __has_include(<KX11Extras>)
         return KX11Extras::compositingActive();
 #endif
     }
@@ -1886,6 +1892,7 @@ bool Helper::shouldDrawToolsArea(const QWidget *widget) const
         return false;
     }
 
+    // commented out was the Breeze logic. For Silver as we can set the borders to titlebar colour to avoid any such visual glitches
     /*
     static bool isAuto = false;
     static QString borderSize;
@@ -1917,7 +1924,7 @@ bool Helper::shouldDrawToolsArea(const QWidget *widget) const
     }
     if (borderSize != "None" && borderSize != "NoSides") {
         return false;
-    }*/ //commented out for silver as we can set the borders to titlebar colour to avoid any such visual glitches
+    }*/
     return true;
 }
 

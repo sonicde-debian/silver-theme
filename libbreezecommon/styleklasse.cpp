@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2022 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -19,7 +20,7 @@ void RenderStyleKlasse18By18::renderMaximizeIcon()
     renderSquareMaximizeIcon(false);
 }
 
-void RenderStyleKlasse18By18::renderRestoreIcon()
+void RenderStyleKlasse18By18::renderFloatIcon()
 {
     renderOverlappingWindowsIcon(false);
 }
@@ -28,21 +29,4 @@ void RenderStyleKlasse18By18::renderMinimizeIcon()
 {
     renderTinySquareMinimizeIcon();
 }
-
-// For consistency with breeze icon set
-void RenderStyleKlasse18By18::renderKeepBehindIcon()
-{
-    renderKeepBehindIconAsFromBreezeIcons();
-}
-
-void RenderStyleKlasse18By18::renderKeepInFrontIcon()
-{
-    renderKeepInFrontIconAsFromBreezeIcons();
-}
-
-void RenderStyleKlasse18By18::renderContextHelpIcon()
-{
-    renderRounderAndBolderContextHelpIcon();
-}
-
 }

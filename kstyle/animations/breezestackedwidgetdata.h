@@ -47,5 +47,4 @@ private:
     //* current index
     int _index;
 };
-
 }

@@ -162,5 +162,4 @@ private:
     //* keep list of existing engines
     QList<BaseEngine::Pointer> _engines;
 };
-
 }

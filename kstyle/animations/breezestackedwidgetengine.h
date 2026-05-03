@@ -58,5 +58,4 @@ private:
     //* maps
     DataMap<StackedWidgetData> _data;
 };
-
 }

@@ -47,5 +47,4 @@ QModelIndexList ItemModel::indexes(int column, const QModelIndex &parent) const
 
     return out;
 }
-
 }

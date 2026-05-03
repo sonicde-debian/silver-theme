@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2023-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -161,14 +162,16 @@ private:
                                QColor baseColor,
                                QColor &bistate1,
                                QColor &bistate2,
-                               QColor accentHoverBase = QColor());
+                               QColor accentHoverBase = QColor(),
+                               const bool replaceWithActiveHoverPress = false);
     void generateTristateColors(ButtonComponent component,
                                 const bool active,
                                 QColor baseColor,
                                 QColor &tristate1,
                                 QColor &tristate2,
                                 QColor &tristate3,
-                                QColor accentHoverBase = QColor());
+                                QColor accentHoverBase = QColor(),
+                                const bool replaceWithActiveHoverPress = false);
     void generateButtonBackgroundPalette(const bool active);
     void generateButtonForegroundPalette(const bool active);
     void adjustPoorForegroundContrast(QColor &baseForegroundColor,

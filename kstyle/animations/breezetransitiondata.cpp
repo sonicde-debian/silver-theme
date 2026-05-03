@@ -28,5 +28,4 @@ TransitionData::~TransitionData()
         _transition.data()->deleteLater();
     }
 }
-
 }

@@ -3,8 +3,8 @@
     "KPlugin": {
         "Authors": [
             {
-                "Email": "kde@paulmcauley.com",
-                "Name": "Paul A McAuley"
+                "Email": "joseph.w.crowell@gmail.com",
+                "Name": "Joseph Crowell"
             }
         ],
         "Category": "",
@@ -13,6 +13,7 @@
         "Id": "org.kde.silver.plasma.desktop.bottomPanel",
         "License": "LGPLv2+",
         "Name": "Silver Bottom Panel",
+        "Name[fr]": "Panneau inférieur Silver",
         "ServiceTypes": [
             "Plasma/LayoutTemplate"
         ],

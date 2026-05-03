@@ -91,5 +91,4 @@ private:
     //* sorting order
     Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
-
 }

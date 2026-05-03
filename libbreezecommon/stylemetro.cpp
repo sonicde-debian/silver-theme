@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2021 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -18,7 +19,7 @@ void RenderStyleMetro18By18::renderMaximizeIcon()
     renderSquareMaximizeIcon(false);
 }
 
-void RenderStyleMetro18By18::renderRestoreIcon()
+void RenderStyleMetro18By18::renderFloatIcon()
 {
     renderOverlappingWindowsIcon(false);
 }
@@ -69,21 +70,4 @@ void RenderStyleMetro18By18::renderMinimizeIcon()
         m_painter->drawPolyline(line);
     }
 }
-
-// For consistency with breeze icon set
-void RenderStyleMetro18By18::renderKeepBehindIcon()
-{
-    renderKeepBehindIconAsFromBreezeIcons();
-}
-
-void RenderStyleMetro18By18::renderKeepInFrontIcon()
-{
-    renderKeepInFrontIconAsFromBreezeIcons();
-}
-
-void RenderStyleMetro18By18::renderContextHelpIcon()
-{
-    renderRounderAndBolderContextHelpIcon();
-}
-
 }

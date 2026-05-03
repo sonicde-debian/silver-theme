@@ -84,5 +84,4 @@ private:
     //* data map
     DataMap<SpinBoxData> _data;
 };
-
 }

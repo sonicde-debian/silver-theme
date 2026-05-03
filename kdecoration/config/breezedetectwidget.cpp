@@ -54,5 +54,4 @@ QVariantMap DetectDialog::properties() const
 {
     return m_properties;
 }
-
 }

@@ -79,5 +79,4 @@ private:
     //* map
     DataMap<WidgetStateData> _data;
 };
-
 }

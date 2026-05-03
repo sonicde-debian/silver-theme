@@ -4,6 +4,7 @@
 //
 // SPDX-FileCopyrightText: 2009 Hugo Pereira Da Costa <hugo.pereira@free.fr>
 // SPDX-FileCopyrightText: 2021-2024 Paul A McAuley <kde@paulmcauley.com>
+// SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell @gmail.com>
 //
 // SPDX-License-Identifier: MIT
 //////////////////////////////////////////////////////////////////////////////
@@ -16,6 +17,7 @@
 #include "buttonbehaviour.h"
 #include "buttoncolors.h"
 #include "buttonsizing.h"
+#include "kdecorationglobals.h"
 #include "loadpreset.h"
 #include "shadowstyle.h"
 #include "systemicongeneration.h"
@@ -86,6 +88,11 @@ public:
         return m_ui.buttonShape->currentIndex();
     }
 
+    bool matchTitleBarToApplicationColor()
+    {
+        return m_ui.matchTitleBarToApplicationColor->isChecked();
+    }
+
     QList<DecorationButtonType> m_visibleButtonsOrder; // ordered visible buttons (visible + an added dummy Custom button used in the icon display
                                                        // of the colour palette for "other" buttons)
     QList<DecorationButtonType>
@@ -104,7 +111,7 @@ protected Q_SLOTS:
     //* update changed state
     virtual void updateChanged();
     void setEnabledAnimationsSpeed();
-    void updateIconsStackedWidgetVisible();
+    void onIconsChanged();
     void systemIconGenerationButtonClicked();
     void buttonSizingButtonClicked();
     void buttonColorsButtonClicked();
@@ -171,5 +178,4 @@ private:
     void generateWindowControlPreviewIcon(QSize size, InternalSettings::EnumButtonIconStyle::type iconStyle);
     void getButtonsOrderFromKwinConfig();
 };
-
 }

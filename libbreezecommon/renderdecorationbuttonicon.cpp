@@ -1,18 +1,21 @@
 /*
  * SPDX-FileCopyrightText: 2022-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
 
 #include "renderdecorationbuttonicon.h"
+#include "styleark.h"
+#include "stylearkopal.h"
+#include "stylearkopalleft.h"
 #include "stylefluent.h"
-#include "stylekairn.h"
-#include "stylekairnleft.h"
 #include "stylekisweet.h"
-#include "stylekite.h"
 #include "styleklasse.h"
 #include "stylemetro.h"
 #include "styleoxygen.h"
+#include "stylesilver.h"
+#include "stylesuessigsilver.h"
 #include "styletraditional.h"
 #include "systemicontheme.h"
 #include <algorithm>
@@ -30,34 +33,26 @@ std::pair<std::unique_ptr<RenderDecorationButtonIcon>, int> RenderDecorationButt
                                                                                                 const bool forceEvenSquares)
 {
     switch (internalSettings->buttonIconStyle()) {
-    case InternalSettings::EnumButtonIconStyle::StyleKairn:
+    case InternalSettings::EnumButtonIconStyle::StyleSilver:
     default:
         return {
-            std::make_unique<RenderStyleKairn18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
+            std::make_unique<RenderStyleSilver18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
             18};
-    case InternalSettings::EnumButtonIconStyle::StyleKairnLeft:
-        return {std::make_unique<RenderStyleKairnLeft18By18>(painter,
-                                                             fromKstyle,
-                                                             boldButtonIcons,
-                                                             devicePixelRatio,
-                                                             deviceOffsetFromZeroReference,
-                                                             forceEvenSquares),
+    case InternalSettings::EnumButtonIconStyle::StyleSuessigSilver:
+        return {std::make_unique<RenderStyleSuessigSilver18By18>(painter,
+                                                                 fromKstyle,
+                                                                 boldButtonIcons,
+                                                                 devicePixelRatio,
+                                                                 deviceOffsetFromZeroReference,
+                                                                 forceEvenSquares),
                 18};
-    case InternalSettings::EnumButtonIconStyle::StyleKisweet:
+    case InternalSettings::EnumButtonIconStyle::StyleOxygen:
         return {
-            std::make_unique<RenderStyleKisweet18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
+            std::make_unique<RenderStyleOxygen18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
             18};
     case InternalSettings::EnumButtonIconStyle::StyleKlasse:
         return {
             std::make_unique<RenderStyleKlasse18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
-            18};
-    case InternalSettings::EnumButtonIconStyle::StyleKite:
-        return {
-            std::make_unique<RenderStyleKite18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
-            18};
-    case InternalSettings::EnumButtonIconStyle::StyleOxygen:
-        return {
-            std::make_unique<RenderStyleOxygen18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
             18};
     case InternalSettings::EnumButtonIconStyle::StyleTraditional:
         return {std::make_unique<RenderStyleTraditional18By18>(painter,
@@ -74,6 +69,25 @@ std::pair<std::unique_ptr<RenderDecorationButtonIcon>, int> RenderDecorationButt
     case InternalSettings::EnumButtonIconStyle::StyleFluent:
         return {
             std::make_unique<RenderStyleFluent18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
+            18};
+    case InternalSettings::EnumButtonIconStyle::StyleArk:
+        return {std::make_unique<RenderStyleArk18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
+                18};
+    case InternalSettings::EnumButtonIconStyle::StyleArkopal:
+        return {
+            std::make_unique<RenderStyleArkopal18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
+            18};
+    case InternalSettings::EnumButtonIconStyle::StyleArkopalLeft:
+        return {std::make_unique<RenderStyleArkopalLeft18By18>(painter,
+                                                               fromKstyle,
+                                                               boldButtonIcons,
+                                                               devicePixelRatio,
+                                                               deviceOffsetFromZeroReference,
+                                                               forceEvenSquares),
+                18};
+    case InternalSettings::EnumButtonIconStyle::StyleKisweet:
+        return {
+            std::make_unique<RenderStyleKisweet18By18>(painter, fromKstyle, boldButtonIcons, devicePixelRatio, deviceOffsetFromZeroReference, forceEvenSquares),
             18};
     }
 }
@@ -121,7 +135,7 @@ void RenderDecorationButtonIcon::renderIcon(DecorationButtonType type, bool chec
 
     case DecorationButtonType::Maximize:
         if (checked) {
-            renderRestoreIcon();
+            renderFloatIcon();
         } else {
             renderMaximizeIcon();
         }
@@ -261,16 +275,16 @@ QPointF RenderDecorationButtonIcon::snapToNearestPixel(const QPointF pointLocal)
 
     coordFractionalPart = abs(modf(pointLocal.x(), &coordIntegralPart));
     if (coordFractionalPart < (0.5 + halfLimit) && coordFractionalPart > (0.5 - halfLimit)) { // if around 0.5 snap to a half-pixel
-        snapX = m_isOddPenWidth ? SnapPixel::ToHalf : SnapPixel::ToWhole;
+        snapX = SnapPixel::ToHalf;
     } else {
-        snapX = m_isOddPenWidth ? SnapPixel::ToWhole : SnapPixel::ToHalf;
+        snapX = SnapPixel::ToWhole;
     }
 
     coordFractionalPart = abs(modf(pointLocal.y(), &coordIntegralPart));
     if (coordFractionalPart < (0.5 + halfLimit) && coordFractionalPart > (0.5 - halfLimit)) { // if around 0.5 snap to a half-pixel
-        snapY = m_isOddPenWidth ? SnapPixel::ToHalf : SnapPixel::ToWhole;
+        snapY = SnapPixel::ToHalf;
     } else {
-        snapY = m_isOddPenWidth ? SnapPixel::ToWhole : SnapPixel::ToHalf;
+        snapY = SnapPixel::ToWhole;
     }
 
     return (snapToNearestPixel(pointLocal, snapX, snapY));

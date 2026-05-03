@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2021-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -27,7 +28,7 @@ protected:
 
     virtual void renderCloseIcon() override;
     virtual void renderMaximizeIcon() override;
-    virtual void renderRestoreIcon() override;
+    virtual void renderFloatIcon() override;
     virtual void renderMinimizeIcon() override;
     virtual void renderPinnedOnAllDesktopsIcon() override;
     virtual void renderPinOnAllDesktopsIcon() override;
@@ -58,9 +59,10 @@ protected:
                                            qreal halfPenWidthLocal);
 
     void renderTinySquareMinimizeIcon(bool showArrows = false);
+    void renderOnAllDesktopsIcon();
     void renderKeepBehindIconAsFromBreezeIcons();
     void renderKeepInFrontIconAsFromBreezeIcons();
-    void renderRounderAndBolderContextHelpIcon();
+    void renderBreezeOriginalContextHelpIcon();
 };
 
 }

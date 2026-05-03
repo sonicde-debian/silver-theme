@@ -118,5 +118,4 @@ qreal TabBarData::opacity(const QPoint &position) const
         return OpacityInvalid;
     }
 }
-
 }

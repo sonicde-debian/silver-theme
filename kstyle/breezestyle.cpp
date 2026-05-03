@@ -2,7 +2,8 @@
  * SPDX-FileCopyrightText: 2016 The Qt Company Ltd.
  * SPDX-FileCopyrightText: 2021 Noah Davis <noahadvs@gmail.com>
  * SPDX-FileCopyrightText: 2023 ivan tkachenko <me@ratijas.tk>
- * SPDX-FileCopyrightText: 2021-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2021-2025 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
@@ -24,6 +25,7 @@
 #include "decorationcolors.h"
 
 #include <KColorUtils>
+#include <KConfigWatcher>
 #include <KIconLoader>
 #include <KWindowEffects>
 #include <kguiaddons_version.h>
@@ -261,6 +263,12 @@ ToolButtonMenuArrowStyle toolButtonMenuArrowStyle(const QStyleOption *option)
 namespace Breeze
 {
 
+namespace Metrics
+{
+qreal Frame_FrameRadius = 3; // set in Helper::loadConfig
+qreal CheckBox_Radius = 0; // set in Helper::loadConfig
+}
+
 //______________________________________________________________
 Style::Style()
     : _helper(std::make_shared<Helper>(StyleConfigData::self()->sharedConfig()))
@@ -321,6 +329,12 @@ Style::Style()
     // call the slot directly; this initial call will set up things that also
     // need to be reset when the system palette changes
     loadConfiguration();
+
+    // Watch for changes to silver/silverrc config file to reload settings without restart
+    _configWatcher = KConfigWatcher::create(KSharedConfig::openConfig(QStringLiteral("silver/silverrc")));
+    connect(_configWatcher.data(), &KConfigWatcher::configChanged, this, [this](const KConfigGroup &, const QByteArrayList &) {
+        loadConfiguration();
+    });
 
 #if HAVE_QTDBUS
     connect(&g_dBusUpdateNotifier,
@@ -1870,7 +1884,7 @@ void Style::drawMainWindow(QPainter *painter, const QMainWindow *mw, const bool 
             painter->setBrush(windowColor);
             painter->drawRect(bg);
         }
-        if (toolsAreaWithHeaderColors) {
+        if (toolsAreaWithHeaderColors && !_helper->decorationConfig()->hideTitleBar()) {
             drawToolsAreaSeparator(painter, mw);
         }
     } else {
@@ -1883,7 +1897,7 @@ void Style::drawMainWindow(QPainter *painter, const QMainWindow *mw, const bool 
             painter->setBrush(windowColor);
             painter->drawRect(bg);
         }
-        drawToolsAreaBackgroundAndSeparator(painter, mw, rect, true);
+        drawToolsAreaBackgroundAndSeparator(painter, mw, rect, !toolsAreaWithHeaderColors);
     }
 }
 
@@ -1925,7 +1939,7 @@ void Style::drawDialog(QPainter *painter, const QDialog *dialog, const bool draw
                 painter->setBrush(windowColor);
                 painter->drawRect(bg);
             }
-            drawToolsAreaBackgroundAndSeparator(painter, dialog, rect, true);
+            drawToolsAreaBackgroundAndSeparator(painter, dialog, rect, !toolsAreaWithHeaderColors);
         } else {
             if (drawDialogBackground) {
                 auto bg = dialog->rect();
@@ -1933,7 +1947,7 @@ void Style::drawDialog(QPainter *painter, const QDialog *dialog, const bool draw
                 painter->setBrush(windowColor);
                 painter->drawRect(bg);
             }
-            if (toolsAreaWithHeaderColors) {
+            if (toolsAreaWithHeaderColors && !_helper->decorationConfig()->hideTitleBar()) {
                 drawToolsAreaSeparator(painter, dialog);
             }
         }
@@ -1963,40 +1977,44 @@ void Style::drawToolsAreaSeparator(QPainter *painter, const QWidget *w) const
     painter->drawLine(w->rect().topLeft() + QPointF(0, PenWidth::Frame / 2), w->rect().topRight() + QPointF(1, PenWidth::Frame / 2));
 }
 
-void Style::drawToolsAreaBackgroundAndSeparator(QPainter *painter, const QWidget *w, const QRect &rect, const bool drawBackground) const
+void Style::drawToolsAreaBackgroundAndSeparator(QPainter *painter, const QWidget *w, const QRect &rect, const bool faintSeparator) const
 {
     if (!(qobject_cast<const QMainWindow *>(w) || qobject_cast<const QDialog *>(w))) {
         return;
     }
 
-    if (drawBackground) {
-        QBrush color = _toolsAreaManager->palette().brush(w->isActiveWindow() ? QPalette::Active : QPalette::Inactive, QPalette::Window);
+    QBrush color = _toolsAreaManager->palette().brush(w->isActiveWindow() ? QPalette::Active : QPalette::Inactive, QPalette::Window);
 
-        if (_helper->decorationConfig()->applyOpacityToHeader() && color.color().alpha() < 255) {
-            if ((w->isMaximized() || w->isFullScreen()) && _helper->decorationConfig()->opaqueMaximizedTitleBars()) {
-                QColor colorWithoutAlpha = color.color();
-                colorWithoutAlpha.setAlpha(255);
-                color.setColor(colorWithoutAlpha);
-            } else if (_helper->decorationConfig()->blurTransparentTitleBars()) { // apply blur to tools area
-                if ((w->testAttribute(Qt::WA_WState_Created) || w->internalWinId())) {
-                    // PAM: modified from breezeblurhelper.cpp -- did not use _blurHelper->registerWidget() as it doesn't allow you to specify a region, hence
-                    // blurring the entire window and causing kornerbug
-                    w->winId(); // force creation of the window handle
-                    KWindowEffects::enableBlurBehind(w->windowHandle(), true, rect);
+    if (_helper->decorationConfig()->applyOpacityToHeader() && color.color().alpha() < 255) {
+        if ((w->isMaximized() || w->isFullScreen()) && _helper->decorationConfig()->opaqueMaximizedTitleBars()) {
+            QColor colorWithoutAlpha = color.color();
+            colorWithoutAlpha.setAlpha(255);
+            color.setColor(colorWithoutAlpha);
+        } else if (_helper->decorationConfig()->blurTransparentTitleBars()) { // apply blur to tools area
+            if ((w->testAttribute(Qt::WA_WState_Created) || w->internalWinId())) {
+                // PAM: modified from breezeblurhelper.cpp -- did not use _blurHelper->registerWidget() as it doesn't allow you to specify a region, hence
+                // blurring the entire window and causing kornerbug
+                w->winId(); // force creation of the window handle
+                KWindowEffects::enableBlurBehind(w->windowHandle(), true, rect);
 
-                    // no force update at this point like in breezeblurhelper.cpp, as already drawing next and creates an infinite loop
-                }
+                // no force update at this point like in breezeblurhelper.cpp, as already drawing next and creates an infinite loop
             }
         }
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(color);
-        painter->drawRect(rect);
     }
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(color);
+    painter->drawRect(rect);
 
     // default Painter composition mode from previous function may be CompositionMode_Source
     painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
     painter->setRenderHints(QPainter::Antialiasing);
-    QPen pen(_helper->separatorColor(_toolsAreaManager->palette()), PenWidth::Frame * qRound(w->devicePixelRatioF()));
+
+    QColor penColor = _helper->separatorColor(_toolsAreaManager->palette());
+    if (faintSeparator) {
+        penColor.setAlphaF(penColor.alphaF() * 0.3);
+    }
+    QPen pen(penColor, PenWidth::Frame * qRound(w->devicePixelRatioF()));
+    pen.setColor(penColor);
     pen.setCosmetic(true);
     painter->setPen(pen);
     painter->drawLine(rect.bottomLeft() + QPointF(0, 1 - PenWidth::Frame / 2), rect.bottomRight() + QPointF(1, 1 - PenWidth::Frame / 2));
@@ -6922,7 +6940,11 @@ bool Style::drawRubberBandControl(const QStyleOption *option, QPainter *painter,
     auto background = palette.color(HighlightColor);
     background.setAlphaF(0.20);
 
-    painter->setPen(outline);
+    QPen pen(outline);
+    if (Metrics::Frame_FrameRadius < 0.4)
+        pen.setJoinStyle(Qt::MiterJoin); // make low corner radii as sharp as possible
+
+    painter->setPen(pen);
     painter->setBrush(background);
     painter->drawRoundedRect(_helper->strokedRect(option->rect), Metrics::Frame_FrameRadius, Metrics::Frame_FrameRadius);
 

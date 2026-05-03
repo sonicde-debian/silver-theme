@@ -162,5 +162,4 @@ private:
     DataMap<WidgetStateData> _enableData;
     DataMap<WidgetStateData> _pressedData;
 };
-
 }

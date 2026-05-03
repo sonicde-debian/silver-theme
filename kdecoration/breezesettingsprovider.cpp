@@ -1,6 +1,7 @@
 /*
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
- * SPDX-FileCopyrightText: 2022-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2022-2026 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -8,8 +9,10 @@
 #include "breezesettingsprovider.h"
 #include "dbusmessages.h"
 #include "decorationexceptionlist.h"
+#include "kdecorationglobals.h"
 #include "presetsmodel.h"
 
+#include <QDateTime>
 #include <QRegularExpression>
 #include <QTextStream>
 
@@ -52,6 +55,7 @@ void SettingsProvider::reconfigure()
     exceptions.readConfig(m_config);
     m_exceptions = exceptions.getDefault();
     m_exceptions.append(exceptions.get());
+    refreshConfig();
 }
 
 //__________________________________________________________________
@@ -90,7 +94,7 @@ InternalSettingsPtr SettingsProvider::internalSettings(Decoration *decoration)
         }
 
         // check matching
-        QRegularExpression rx(internalSettings->exceptionWindowPropertyPattern());
+        QRegularExpression rx(internalSettings->exceptionWindowPropertyPattern(), QRegularExpression::MultilineOption);
         if (rx.match(windowPropertyValue).hasMatch()) {
             // load preset if set
             if (!internalSettings->exceptionPreset().isEmpty()) {
@@ -121,11 +125,39 @@ InternalSettingsPtr SettingsProvider::internalSettings(Decoration *decoration)
             if (internalSettings->opaqueTitleBar()) {
                 internalSettings->setProperty("noCacheException", true);
             }
+            if (internalSettings->exceptionMatchTitleBarToApplicationColor()) {
+                internalSettings->setProperty("noCacheException", true);
+                internalSettings->setMatchTitleBarToApplicationColor(true);
+            }
+#if KDECORATION_VERSION < KDECORATION_VERSION_CHECK(6, 5, 0)
+            internalSettings->setRoundAllCornersWhenNoBorders(false);
+#endif
             return internalSettings;
         }
     }
-
+#if KDECORATION_VERSION < KDECORATION_VERSION_CHECK(6, 5, 0)
+    m_defaultSettings->setRoundAllCornersWhenNoBorders(false);
+#endif
     return m_defaultSettings;
 }
+// delete this after Silver v6.5; v6.5 spacing is standardised to be all in pixels and will make the existing configs look corrupt
+void SettingsProvider::refreshConfig()
+{
+    QString silverVersion = silverLongVersion();
+    if (silverVersion == "6.5" || silverVersion == "6.5.1" || silverVersion == "6.5.2" || silverVersion == "6.5.3" || silverVersion == "6.5.git") {
+        QString refreshedConfig = m_defaultSettings->refreshedConfig();
+        if (refreshedConfig != QStringLiteral("6.5") && refreshedConfig != QStringLiteral("6.5.1") && refreshedConfig != QStringLiteral("6.5.2")
+            && refreshedConfig != QStringLiteral("6.5.3") && refreshedConfig != QStringLiteral("6.5.git")) {
+            // backup the user's existing config
+            auto backupConfig = m_config->copyTo(m_config->name() + QDateTime::currentDateTime().toString(Qt::ISODate) + QStringLiteral(".old"));
+            backupConfig->sync();
 
+            // refresh the config to defaults
+            m_defaultSettings->setDefaults();
+            m_defaultSettings->setRefreshedConfig(silverVersion);
+            m_defaultSettings->save();
+            m_config->sync();
+        }
+    }
+}
 }

@@ -7,6 +7,8 @@
     <group name="Global">
         <!-- used to indicate that Silver settings have been set for the specified look-and-feel global theme -->
         <entry name="LookAndFeelSet" type="String" />
+        <!-- used to indicate if the Silver settings have been refreshed -->
+        <entry name="RefreshedConfig" type="String" />
     </group>
 
     <group name="Windeco">
@@ -17,17 +19,19 @@
         <entry name="ButtonIconStyle" type="Enum">
             <choices>
                 <choice name="StyleSystemIconTheme" />
-                <choice name="StyleKairn" />
-                <choice name="StyleKairnLeft" />
-                <choice name="StyleKisweet" />
-                <choice name="StyleKlasse" />
-                <choice name="StyleKite" />
+                <choice name="StyleSilver" />
+                <choice name="StyleSuessigSilver" />
                 <choice name="StyleOxygen" />
+                <choice name="StyleKlasse" />
                 <choice name="StyleTraditional" />
                 <choice name="StyleMetro" />
                 <choice name="StyleFluent" />
+                <choice name="StyleArk" />
+                <choice name="StyleArkopal" />
+                <choice name="StyleArkopalLeft" />
+                <choice name="StyleKisweet" />
             </choices>
-            <default>StyleKairn</default>
+            <default>StyleSilver</default>
         </entry>
 
         <!-- button size -->
@@ -75,8 +79,10 @@
                 <choice name="BoldIconsBold" />
                 <choice name="BoldIconsFine" />
                 <choice name="BoldIconsHiDpiOnly" />
+                <choice name="BoldIconsActive" />
+                <choice name="BoldIconsActiveHiDpi" />
             </choices>
-            <default>BoldIconsHiDpiOnly</default>
+            <default>BoldIconsActiveHiDpi</default>
         </entry>
 
         <!-- button background shape -->
@@ -95,24 +101,35 @@
 
         <!-- ______________________________TITLEBAR______________________________ -->
 
-        <!-- background gradient -->
+        <entry name="MatchTitleBarToApplicationColor" type="Bool">
+            <default>false</default>
+        </entry>
+
         <entry name="DrawBackgroundGradient" type="Bool">
             <default>false</default>
         </entry>
 
         <entry name="DrawTitleBarSeparator" type="Bool">
+            <default>true</default>
+        </entry>
+
+        <entry name="BoldTitle" type="Bool">
+            <default>true</default>
+        </entry>
+
+        <entry name="UnderlineTitle" type="Bool">
             <default>false</default>
         </entry>
 
         <!-- ______________________________WINDOW______________________________ -->
 
         <entry name="WindowCornerRadius" type="Double">
-            <default>5</default>
+            <default>4</default>
             <min>0</min>
             <max>24.0</max>
         </entry>
 
-        <entry name="RoundBottomCornersWhenNoBorders" type="Bool">
+        <entry name="RoundAllCornersWhenNoBorders" type="Bool">
             <default>true</default>
         </entry>
 
@@ -124,7 +141,7 @@
             <default>false</default>
         </entry>
 
-        <entry name="ColorizeThinWindowOutlineWithButton" type="Bool">
+        <entry name="ColorizeWindowOutlineWithButton" type="Bool">
             <default>true</default>
         </entry>
 
@@ -166,16 +183,16 @@
 
         <!-- left button spacing for non-full-height buttons-->
         <entry name="ButtonSpacingLeft" type="Int">
-            <default>3</default>
+            <default>6</default>
             <min>0</min>
-            <max>50</max>
+            <max>100</max>
         </entry>
 
         <!-- right button spacing for non-full-height buttons-->
         <entry name="ButtonSpacingRight" type="Int">
-            <default>5</default>
+            <default>10</default>
             <min>0</min>
-            <max>50</max>
+            <max>100</max>
         </entry>
 
         <entry name="LockButtonSpacingLeftRight" type="Bool">
@@ -184,16 +201,16 @@
 
         <!-- Full-height button width margin left -->
         <entry name="FullHeightButtonWidthMarginLeft" type="Int">
-            <default>4</default>
+            <default>6</default>
             <min>0</min>
-            <max>50</max>
+            <max>100</max>
         </entry>
 
         <!-- Full-height button width margin right -->
         <entry name="FullHeightButtonWidthMarginRight" type="Int">
-            <default>9</default>
+            <default>18</default>
             <min>0</min>
-            <max>50</max>
+            <max>100</max>
         </entry>
 
         <entry name="CloseFullHeightButtonWidthMarginRelative" type="Int">
@@ -210,18 +227,18 @@
         <entry name="FullHeightButtonSpacingLeft" type="Int">
             <default>2</default>
             <min>0</min>
-            <max>50</max>
+            <max>100</max>
         </entry>
 
         <!-- right button spacing for full-height buttons-->
         <entry name="FullHeightButtonSpacingRight" type="Int">
-            <default>2</default>
+            <default>4</default>
             <min>0</min>
-            <max>50</max>
+            <max>100</max>
         </entry>
 
         <entry name="LockFullHeightButtonSpacingLeftRight" type="Bool">
-            <default>true</default>
+            <default>false</default>
         </entry>
 
         <entry name="ButtonCornerRadius" type="Enum">
@@ -240,13 +257,13 @@
 
         <!--Integrated Rounded Rectangle Bottom Padding -->
         <entry name="IntegratedRoundedRectangleBottomPadding" type="Double">
-            <default>1</default>
+            <default>1.5</default>
             <min>0</min>
-            <max>10</max>
+            <max>20</max>
         </entry>
 
         <entry name="SpacerButtonWidthRelative" type="Int">
-            <default>33</default>
+            <default>50</default>
             <min>1</min>
             <max>400</max>
         </entry>
@@ -263,7 +280,11 @@
         <!-- button icon colors -->
 
         <entry name="LockButtonColorsActiveInactive" type="Bool">
-            <default>false</default>
+            <default>true</default>
+        </entry>
+
+        <entry name="ButtonColorsInactiveSameHoverPress" type="Bool">
+            <default>true</default>
         </entry>
 
         <entry name="ButtonIconColors$(ButtonIconColorsActive)" type="Enum">
@@ -280,7 +301,7 @@
                 <choice name="AccentNegativeClose" />
                 <choice name="AccentTrafficLights" />
             </choices>
-            <default param="Active">AccentTrafficLights</default>
+            <default param="Active">TitleBarText</default>
             <default param="Inactive">TitleBarText</default>
         </entry>
 
@@ -342,7 +363,7 @@
                 <choice name="AccentNegativeClose" />
                 <choice name="AccentTrafficLights" />
             </choices>
-            <default>AccentTrafficLights</default>
+            <default>AccentNegativeClose</default>
         </entry>
 
         <entry name="NegativeCloseBackgroundHoverPress$(NegativeCloseBackgroundHoverPressActive)" type="Bool">
@@ -394,7 +415,7 @@
                     <value>Active</value>
                 </values>
             </parameter>
-            <default param="Inactive">50</default>
+            <default param="Inactive">100</default>
             <default param="Active">100</default>
             <min>0</min>
             <max>100</max>
@@ -427,7 +448,6 @@
                     <value>KeepAbove</value>
                 </values>
             </parameter>
-            <default>""</default>
         </entry>
 
         <entry name="ButtonOverrideColorsInactive$(ButtonOverrideColorsInactiveButtonType)" type="String">
@@ -445,7 +465,6 @@
                     <value>KeepAbove</value>
                 </values>
             </parameter>
-            <default>""</default>
         </entry>
 
         <entry name="ButtonOverrideColorsLockStates$(ButtonOverrideColorsLockStatesActive)" type="String">
@@ -455,7 +474,6 @@
                     <value>Active</value>
                 </values>
             </parameter>
-            <default>""</default>
         </entry>
 
     </group>
@@ -821,19 +839,23 @@
             <default>true</default>
         </entry>
 
+        <entry name="UnisonHovering" type="Bool">
+            <default>false</default>
+        </entry>
+
     </group>
 
     <group name="TitleBarSpacing">
         <entry name="TitleBarTopMargin" type="Double">
-            <default>2</default>
+            <default>3.6</default>
             <min>0</min>
-            <max>25</max>
+            <max>50</max>
         </entry>
 
         <entry name="TitleBarBottomMargin" type="Double">
-            <default>2</default>
+            <default>3.6</default>
             <min>0</min>
-            <max>25</max>
+            <max>50</max>
         </entry>
 
         <entry name="LockTitleBarTopBottomMargins" type="Bool">
@@ -843,13 +865,13 @@
         <entry name="TitleBarLeftMargin" type="Int">
             <default>0</default>
             <min>0</min>
-            <max>30</max>
+            <max>60</max>
         </entry>
 
         <entry name="TitleBarRightMargin" type="Int">
             <default>0</default>
             <min>0</min>
-            <max>30</max>
+            <max>60</max>
         </entry>
 
         <entry name="LockTitleBarLeftRightMargins" type="Bool">
@@ -869,9 +891,9 @@
 
         <!-- Title side padding -->
         <entry name="TitleSidePadding" type="Int">
-            <default>2</default>
+            <default>4</default>
             <min>0</min>
-            <max>30</max>
+            <max>60</max>
         </entry>
 
         <!-- top bottom margins % for maximized windows -->
@@ -925,8 +947,23 @@
 
     <group name="WindowOutlineStyle">
         <!-- Draw thin window outline -->
-        <entry name="ThinWindowOutlineStyle$(ThinWindowOutlineStyleActive)" type="Enum">
-            <parameter name="ThinWindowOutlineStyleActive" type="Enum">
+
+        <entry name="WindowOutlineThickness" type="Double">
+            <default>1.0</default>
+            <min>0.5</min>
+            <max>10</max>
+        </entry>
+
+        <entry name="WindowOutlineSnapToWholePixel" type="Bool">
+            <default>true</default>
+        </entry>
+
+        <entry name="WindowOutlineOverlap" type="Bool">
+            <default>true</default>
+        </entry>
+
+        <entry name="WindowOutlineStyle$(WindowOutlineStyleActive)" type="Enum">
+            <parameter name="WindowOutlineStyleActive" type="Enum">
                 <values>
                     <value>Inactive</value>
                     <value>Active</value>
@@ -941,17 +978,17 @@
                 <choice name="WindowOutlineCustomColor" />
                 <choice name="WindowOutlineCustomWithContrast" />
             </choices>
-            <default param="Active">WindowOutlineAccentColor</default>
-            <default param="Inactive">WindowOutlineContrast</default>
+            <default param="Active">WindowOutlineShadowColor</default>
+            <default param="Inactive">WindowOutlineShadowColor</default>
         </entry>
 
 
-        <entry name="LockThinWindowOutlineStyleActiveInactive" type="Bool">
+        <entry name="LockWindowOutlineStyleActiveInactive" type="Bool">
             <default>false</default>
         </entry>
 
-        <entry name="ThinWindowOutlineCustomColor$(ThinWindowOutlineCustomColorActive)" type="Color">
-            <parameter name="ThinWindowOutlineCustomColorActive" type="Enum">
+        <entry name="WindowOutlineCustomColor$(WindowOutlineCustomColorActive)" type="Color">
+            <parameter name="WindowOutlineCustomColorActive" type="Enum">
                 <values>
                     <value>Inactive</value>
                     <value>Active</value>
@@ -960,14 +997,8 @@
             <default>0, 0, 0</default>
         </entry>
 
-        <entry name="LockThinWindowOutlineCustomColorActiveInactive" type="Bool">
+        <entry name="LockWindowOutlineCustomColorActiveInactive" type="Bool">
             <default>true</default>
-        </entry>
-
-        <entry name="ThinWindowOutlineThickness" type="Double">
-            <default>2.25</default>
-            <min>1</min>
-            <max>10</max>
         </entry>
 
         <entry name="WindowOutlineShadowColorOpacity" type="Int">
@@ -1068,12 +1099,24 @@
 
     <group name="Exceptions">
         <!-- hide title bar (exception) -->
-        <entry name="HideTitleBar" type="Bool">
-            <default>false</default>
+        <entry name="HideTitleBar" type="Enum">
+            <choices>
+                <choice name="Never" />
+                <choice name="Always" />
+                <choice name="Maximized" />
+                <choice name="AnyMaximization" />
+                <choice name="KeptBehind" />
+                <choice name="AnyMaximizationOrKeptBehind" />
+            </choices>
+            <default>Never</default>
         </entry>
 
         <!-- opaque title bar (exception) -->
         <entry name="OpaqueTitleBar" type="Bool">
+            <default>false</default>
+        </entry>
+
+        <entry name="ExceptionMatchTitleBarToApplicationColor" type="Bool">
             <default>false</default>
         </entry>
 
@@ -1094,6 +1137,10 @@
         </entry>
 
         <entry name="ExceptionWindowPropertyPattern" type="String" />
+
+        <entry name="ExceptionWindowsBehindOnly" type="Bool">
+            <default>false</default>
+        </entry>
 
         <entry name="Enabled" type="Bool">
             <default>true</default>

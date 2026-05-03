@@ -57,5 +57,4 @@ DataMap<TabBarData>::Value TabBarEngine::data(const QObject *object, AnimationMo
         return DataMap<TabBarData>::Value();
     }
 }
-
 }

@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2022-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -122,6 +123,15 @@ void DecorationColors::generateDecorationPaletteGroup(const QPalette &palette,
     std::unique_ptr<DecorationPaletteGroup> *decorationPaletteGroup = active ? m_decorationPaletteGroupActive : m_decorationPaletteGroupInactive;
 
     (*decorationPaletteGroup)->titleBarBase = active ? titleBarBaseActive : titleBarBaseInactive;
+    (*decorationPaletteGroup)->titleBarText = active ? titleBarTextActive : titleBarTextInactive;
+
+    if (decorationSettings->matchTitleBarToApplicationColor()) {
+        ColorTools::getHigherContrastForegroundColor((*decorationPaletteGroup)->titleBarText, // adjust the text colour to black/white if poor contrast
+                                                     (*decorationPaletteGroup)->titleBarBase,
+                                                     1.5,
+                                                     (*decorationPaletteGroup)->titleBarText);
+    }
+
     bool setTitleBarBaseOpacity = false;
     if (!decorationSettings->opaqueTitleBar()) {
         if ((*decorationPaletteGroup)->titleBarBase.alpha() == 255) {
@@ -137,8 +147,6 @@ void DecorationColors::generateDecorationPaletteGroup(const QPalette &palette,
         (*decorationPaletteGroup)
             ->titleBarBase.setAlphaF(qreal(active ? decorationSettings->activeTitleBarOpacity() : decorationSettings->inactiveTitleBarOpacity()) / 100);
     }
-
-    (*decorationPaletteGroup)->titleBarText = active ? titleBarTextActive : titleBarTextInactive;
 
     KStatefulBrush buttonFocusStatefulBrush;
     KStatefulBrush buttonHoverStatefulBrush;
@@ -187,31 +195,31 @@ void DecorationColors::generateDecorationPaletteGroup(const QPalette &palette,
     (*decorationPaletteGroup)->shadow.setAlphaF(decorationSettings->shadowStrength() / 255.0 * shadowStrengthScale);
 
     // set windowOutline
-    switch (decorationSettings->thinWindowOutlineStyle(active)) {
-    case InternalSettings::EnumThinWindowOutlineStyle::WindowOutlineNone:
+    switch (decorationSettings->windowOutlineStyle(active)) {
+    case InternalSettings::EnumWindowOutlineStyle::WindowOutlineNone:
         (*decorationPaletteGroup)->windowOutline = QColor();
         break;
-    case InternalSettings::EnumThinWindowOutlineStyle::WindowOutlineContrast:
+    case InternalSettings::EnumWindowOutlineStyle::WindowOutlineContrast:
         (*decorationPaletteGroup)->windowOutline =
             ColorTools::alphaMix((*decorationPaletteGroup)->titleBarText, decorationSettings->windowOutlineContrastOpacity(active) / 100.0f);
         break;
-    case InternalSettings::EnumThinWindowOutlineStyle::WindowOutlineAccentColor:
+    case InternalSettings::EnumWindowOutlineStyle::WindowOutlineAccentColor:
         (*decorationPaletteGroup)->windowOutline = accentedWindowOutlineColor((*decorationPaletteGroup).get(), decorationSettings, active);
         break;
-    case InternalSettings::EnumThinWindowOutlineStyle::WindowOutlineAccentWithContrast:
+    case InternalSettings::EnumWindowOutlineStyle::WindowOutlineAccentWithContrast:
         (*decorationPaletteGroup)->windowOutline = fontMixedAccentWindowOutlineColor((*decorationPaletteGroup).get(), decorationSettings, active);
         break;
-    case InternalSettings::EnumThinWindowOutlineStyle::WindowOutlineCustomColor:
+    case InternalSettings::EnumWindowOutlineStyle::WindowOutlineCustomColor:
         (*decorationPaletteGroup)->windowOutline =
-            accentedWindowOutlineColor((*decorationPaletteGroup).get(), decorationSettings, active, decorationSettings->thinWindowOutlineCustomColor(active));
+            accentedWindowOutlineColor((*decorationPaletteGroup).get(), decorationSettings, active, decorationSettings->windowOutlineCustomColor(active));
         break;
-    case InternalSettings::EnumThinWindowOutlineStyle::WindowOutlineCustomWithContrast:
+    case InternalSettings::EnumWindowOutlineStyle::WindowOutlineCustomWithContrast:
         (*decorationPaletteGroup)->windowOutline = fontMixedAccentWindowOutlineColor((*decorationPaletteGroup).get(),
                                                                                      decorationSettings,
                                                                                      active,
-                                                                                     decorationSettings->thinWindowOutlineCustomColor(active));
+                                                                                     decorationSettings->windowOutlineCustomColor(active));
         break;
-    case InternalSettings::EnumThinWindowOutlineStyle::WindowOutlineShadowColor:
+    case InternalSettings::EnumWindowOutlineStyle::WindowOutlineShadowColor:
         (*decorationPaletteGroup)->windowOutline =
             ColorTools::alphaMix((*decorationPaletteGroup)->shadow, decorationSettings->windowOutlineShadowColorOpacity() / 100.0f);
         break;

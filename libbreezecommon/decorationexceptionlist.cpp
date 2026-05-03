@@ -5,6 +5,7 @@
 //
 // SPDX-FileCopyrightText: 2009 Hugo Pereira Da Costa <hugo.pereira@free.fr>
 // SPDX-FileCopyrightText: 2022-2023 Paul A McAuley <kde@paulmcauley.com>
+// SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
 //
 // SPDX-License-Identifier: MIT
 //////////////////////////////////////////////////////////////////////////////
@@ -69,6 +70,7 @@ void DecorationExceptionList::readIndividualExceptionFromConfig(KSharedConfig::P
         configuration->setBorderSize(exception.borderSize());
     configuration->setHideTitleBar(exception.hideTitleBar());
     configuration->setOpaqueTitleBar(exception.opaqueTitleBar());
+    configuration->setExceptionMatchTitleBarToApplicationColor(exception.exceptionMatchTitleBarToApplicationColor());
     configuration->setPreventApplyOpacityToHeader(exception.preventApplyOpacityToHeader());
 
     // append to exceptions
@@ -178,5 +180,4 @@ void DecorationExceptionList::readConfig(KCoreConfigSkeleton *skeleton, KConfig 
         item->readConfig(config);
     }
 }
-
 }

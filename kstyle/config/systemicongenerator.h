@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: MIT
  */
@@ -25,16 +26,8 @@ private:
 
     InternalSettingsPtr m_internalSettings;
 
-    QList<qreal> m_scales = {1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3};
-    const QMap<InternalSettings::EnumIconSize::type, int> m_iconSizes{
-        {InternalSettings::EnumIconSize::IconSmallMedium, 16},
-        {InternalSettings::EnumIconSize::IconMedium, 18},
-        {InternalSettings::EnumIconSize::IconLargeMedium, 20},
-        {InternalSettings::EnumIconSize::IconLarge, 22},
-        {InternalSettings::EnumIconSize::IconVeryLarge, 24},
-        {InternalSettings::EnumIconSize::IconGiant, 32},
-        {InternalSettings::EnumIconSize::IconHumongous, 48},
-    };
+    QList<qreal> m_scales{1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3};
+    const QList<int> m_iconSizes{16, 18, 20, 22, 24, 32, 48};
 
     struct iconType {
         DecorationButtonType type;
@@ -75,6 +68,8 @@ private:
         {DecorationButtonType::KeepAbove, false, QStringLiteral("window-keep-above-symbolic")},
         {DecorationButtonType::KeepAbove, false, QStringLiteral("window-keep-above")},
     };
+
+    bool m_leftPanel = false;
 };
 
 }

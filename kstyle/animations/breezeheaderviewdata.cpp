@@ -149,5 +149,4 @@ void HeaderViewData::setDirty() const
         viewport->update(0, left, header->width(), right - left);
     }
 }
-
 }

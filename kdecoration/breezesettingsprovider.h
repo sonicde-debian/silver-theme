@@ -40,6 +40,8 @@ private:
     //* constructor
     SettingsProvider();
 
+    void refreshConfig();
+
     //* default configuration
     InternalSettingsPtr m_defaultSettings;
 
@@ -55,5 +57,4 @@ private:
     //* singleton
     static SettingsProvider *s_self;
 };
-
 }

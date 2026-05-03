@@ -27,5 +27,4 @@ bool SpinBoxEngine::registerWidget(QObject *target)
     connect(target, &QObject::destroyed, this, &SpinBoxEngine::unregisterWidget, Qt::UniqueConnection);
     return true;
 }
-
 }

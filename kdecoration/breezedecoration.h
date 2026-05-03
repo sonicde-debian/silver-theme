@@ -2,6 +2,7 @@
  * SPDX-FileCopyrightText: 2014 Martin Gräßlin <mgraesslin@kde.org>
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
  * SPDX-FileCopyrightText: 2021-2025 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -13,6 +14,7 @@
 #include "breezesettings.h"
 #include "colortools.h"
 #include "decorationcolors.h"
+#include "kdecorationglobals.h"
 
 #include <KDecoration3/DecoratedWindow>
 #include <KDecoration3/Decoration>
@@ -64,7 +66,7 @@ public:
     }
 
     //* caption height
-    qreal captionHeight(const bool nextState = false) const;
+    qreal captionHeight(const bool nextState, qreal scaledTitleBarTopMargin, qreal scaledTitleBarBottomMargin) const;
 
     //*@name active state change animation
     //@{
@@ -105,7 +107,7 @@ public:
     inline bool hideTitleBar() const;
     //@}
 
-    void setThinWindowOutlineOverrideColor(const bool on, const QColor &color);
+    void setWindowOutlineOverrideColor(const bool on, const QColor &color);
 
     QPainterPath *titleBarPath()
     {
@@ -123,21 +125,31 @@ public:
     {
         return m_buttonBackgroundType;
     }
-    int smallButtonPaddedSize()
+    qreal smallButtonPaddedSize()
     {
         return m_smallButtonPaddedSize;
     }
-    int iconSize()
+    qreal iconSize()
     {
         return m_iconSize;
     }
-    int smallButtonBackgroundSize()
+    qreal smallButtonBackgroundSize()
     {
         return m_smallButtonBackgroundSize;
     }
     qreal scaledCornerRadius()
     {
         return m_scaledCornerRadius;
+    }
+
+    qreal smallSpacing()
+    {
+        return m_smallSpacing;
+    }
+
+    qreal x11Scale()
+    {
+        return m_x11Scale;
     }
 
     KDecoration3::DecorationButtonGroup *leftButtons()
@@ -160,8 +172,14 @@ public:
         return m_opacity;
     }
 
+    bool buttonUnisonHovered() const // for unison hovering
+    {
+        return m_buttonUnisonHovered;
+    }
+
 Q_SIGNALS:
     void reconfigured();
+    void buttonUnisonHoveredChanged(bool); // for unison hovering
 
 public Q_SLOTS:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -169,6 +187,7 @@ public Q_SLOTS:
 #else
     void init() override;
 #endif
+    void setButtonUnisonHovered(bool value);
 
 private Q_SLOTS:
     void reconfigure()
@@ -189,38 +208,50 @@ private Q_SLOTS:
     void updateButtonsGeometryDelayed();
     void updateTitleBar();
     void updateAnimationState();
-    void updateShadowOnShadedChange()
+    void updateShadowOnChange()
     {
         updateShadow();
     }
+    void updateShadowOnChangeNoCache()
+    {
+        updateShadow(false, true);
+    }
     void onTabletModeChanged(bool mode);
+    void updateNextScale();
+
+protected:
+    void hoverMoveEvent(QHoverEvent *event) override; // override decoration hover events for Unison hovering
+    void hoverLeaveEvent(QHoverEvent *event) override;
 
 private:
     //* return the rect in which caption will be drawn
-    QPair<QRectF, Qt::Alignment> captionRect(const bool nextState = false) const;
+    QPair<QRectF, Qt::Alignment> captionRect(bool nextState) const;
 
     void reconfigureMain(const bool noUpdateShadow = false);
     void updateDecorationColors(const QPalette &clientPalette, QByteArray uuid = "");
     void createButtons();
-    void calculateWindowShape();
+    void calculateWindowShape(bool trimForBlurPath = false);
     void calculateTitleBarShape();
     void paintTitleBar(QPainter *painter, const QRectF &repaintRegion);
-    void updateShadow(const bool forceUpdateCache = false, bool noCache = false, const bool isThinWindowOutlineOverride = false);
-    std::shared_ptr<KDecoration3::DecorationShadow> createShadowObject(QColor shadowColor, const bool isThinWindowOutlineOverride = false);
+    void updateShadow(const bool forceUpdateCache = false, bool noCache = false, const bool isWindowOutlineOverride = false);
+    std::shared_ptr<KDecoration3::DecorationShadow> createShadowObject(QColor shadowColor, const bool isWindowOutlineOverride = false);
     void setScaledCornerRadius();
 
     //*@name border size
     //@{
-    int borderSize(bool bottom = false) const;
+    qreal borderSize(bool bottom, qreal scale) const;
     inline bool hasBorders() const;
     inline bool hasNoBorders() const;
     inline bool hasNoSideBorders() const;
     //@}
 
-    void setScaledTitleBarTopBottomMargins();
-    void setScaledTitleBarSideMargins();
+    void scaledTitleBarTopBottomMargins(qreal scale,
+                                        qreal &scaledTitleBarTopMargin,
+                                        qreal &scaledTitleBarBottomMargin,
+                                        qreal &scaledIntegratedRoundedRectangleBottomPadding) const;
+    void scaledTitleBarSideMargins(qreal scale, qreal &scaledTitleBarLeftMargin, qreal &scaledTitleBarRightMargin) const;
     bool isOpaqueTitleBar();
-    int titleBarSeparatorHeight() const;
+    qreal titleBarSeparatorHeight(qreal scale) const;
     qreal devicePixelRatio(QPainter *painter) const;
 
     //* icon + padding sizes
@@ -229,8 +260,8 @@ private:
     //* override thin window outline colour from button colour animation update
     void updateOverrideOutlineFromButtonAnimationState();
 
-    //* calculates and sets m_thinWindowOutline
-    void setThinWindowOutlineColor();
+    //* calculates and sets m_windowOutline
+    void setWindowOutlineColor();
 
     void setGlobalLookAndFeelOptions(QString lookAndFeelPackageName);
 
@@ -263,17 +294,7 @@ private:
     qreal m_scaledCornerRadius = 3.0;
 
     bool m_tabletMode = false;
-
-    //* titleBar top margin, scaled according to smallspacing
-    qreal m_scaledTitleBarTopMargin = 1;
-    //* titleBar bottom margin, scaled according to smallspacing
-    qreal m_scaledTitleBarBottomMargin = 1;
-    //* integrated rounded rectangle bottom padding, scaled according to smallspacing
-    qreal m_scaledIntegratedRoundedRectangleBottomPadding = 0;
-
-    //* titleBar side margins, scaled according to smallspacing
-    qreal m_scaledTitleBarLeftMargin = 1;
-    qreal m_scaledTitleBarRightMargin = 1;
+    bool m_darkTheme = false;
 
     //* Rectangular area of titlebar without clipped corners
     QRectF m_titleRect;
@@ -282,26 +303,32 @@ private:
     QPainterPath m_titleBarPath = QPainterPath();
     //* Exact window path, with clipped rounded corners
     QPainterPath m_windowPath = QPainterPath();
+    QPainterPath m_windowPathTrimmedForBlur = QPainterPath();
 
     qreal m_systemScaleFactorX11 = 1.0;
+    qreal m_x11Scale = 1.0;
+    qreal m_smallSpacing = 2.0;
+    qreal m_gridUnit = 10.0;
 
     ButtonBackgroundType m_buttonBackgroundType = ButtonBackgroundType::Small;
     qreal m_smallButtonPaddedSize = 20;
-    int m_iconSize = 18;
-    int m_smallButtonBackgroundSize = 18;
+    qreal m_iconSize = 18;
+    qreal m_smallButtonBackgroundSize = 18;
 
     bool m_colorSchemeHasHeaderColor = true;
     bool m_toolsAreaWillBeDrawn = true;
 
     //*the actual thin window outline colour to output
-    QColor m_thinWindowOutline = QColor();
+    QColor m_windowOutline = QColor();
     //*colour to override thin window outline with, set from decoration button
-    QColor m_thinWindowOutlineOverride = QColor();
+    QColor m_windowOutlineOverride = QColor();
     //*buffered existing thin window outline colours in case the above override colour is set (needed for animations)
-    QColor m_originalThinWindowOutlineActivePreOverride = QColor();
-    QColor m_originalThinWindowOutlineInactivePreOverride = QColor();
+    QColor m_originalWindowOutlineActivePreOverride = QColor();
+    QColor m_originalWindowOutlineInactivePreOverride = QColor();
     //*flag to animate out an overridden thin window outline
-    bool m_animateOutOverriddenThinWindowOutline = false;
+    bool m_animateOutOverriddenWindowOutline = false;
+
+    bool m_buttonUnisonHovered = false; // for unison hovering
 };
 
 bool Decoration::hasBorders() const
@@ -378,8 +405,29 @@ bool Decoration::isBottomEdge() const
 
 bool Decoration::hideTitleBar() const
 {
+    bool hide = false;
     auto c = window();
-    return m_internalSettings->hideTitleBar() && !c->isShaded();
-}
 
+    switch (m_internalSettings->hideTitleBar()) {
+    default:
+    case InternalSettings::EnumHideTitleBar::Never:
+        break;
+    case InternalSettings::EnumHideTitleBar::Always:
+        hide = !c->isShaded();
+        break;
+    case InternalSettings::EnumHideTitleBar::Maximized:
+        hide = !c->isShaded() && isMaximized();
+        break;
+    case InternalSettings::EnumHideTitleBar::AnyMaximization:
+        hide = !c->isShaded() && (isMaximized() || isMaximizedVertically() || isLeftEdge() || isRightEdge());
+        break;
+    case InternalSettings::EnumHideTitleBar::KeptBehind:
+        hide = !c->isShaded() && c->isKeepBelow();
+        break;
+    case InternalSettings::EnumHideTitleBar::AnyMaximizationOrKeptBehind:
+        hide = !c->isShaded() && (c->isKeepBelow() || isMaximized() || isMaximizedVertically() || isLeftEdge() || isRightEdge());
+        break;
+    }
+    return hide;
+}
 } // end Breeze namespace

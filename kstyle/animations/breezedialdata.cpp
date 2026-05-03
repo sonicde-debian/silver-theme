@@ -78,5 +78,4 @@ void DialData::hoverLeaveEvent(QObject *, QEvent *)
     // reset mouse position
     _position = QPoint(-1, -1);
 }
-
 }

@@ -30,5 +30,4 @@ public:
         return event->type() == QEvent::ChildAdded;
     }
 };
-
 }

@@ -1,6 +1,8 @@
 /*
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
  * SPDX-FileCopyrightText: 2020 Noah Davis <noahadvs@gmail.com>
+ * SPDX-FileCopyrightText: 2021-2025 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
@@ -22,7 +24,7 @@ static constexpr int SmallArrowSize = 5;
 
 // frames
 static constexpr int Frame_FrameWidth = 2;
-static qreal Frame_FrameRadius = 3; // set in Helper::loadConfig
+extern qreal Frame_FrameRadius; // set in Helper::loadConfig
 
 // layout
 static constexpr int Layout_TopLevelMarginWidth = 10;
@@ -68,7 +70,7 @@ static constexpr int MenuButton_IndicatorWidth = 20;
 static constexpr int CheckBox_Size = 20;
 static constexpr int CheckBox_FocusMarginWidth = 2;
 static constexpr int CheckBox_ItemSpacing = 4;
-static qreal CheckBox_Radius = qMax(0.0, Frame_FrameRadius - 1); // set in Helper::loadConfig
+extern qreal CheckBox_Radius; // set in Helper::loadConfig
 
 // menubar items
 static constexpr int MenuBarItem_MarginWidth = 10;

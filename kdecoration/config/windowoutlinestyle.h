@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2023-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: MIT
  */
@@ -43,10 +44,10 @@ private Q_SLOTS:
         save(true);
     }
     void setApplyButtonState(const bool on);
-    void thinWindowOutlineStyleActiveChanged();
-    void thinWindowOutlineStyleInactiveChanged();
-    void thinWindowOutlineCustomColorActiveChanged();
-    void thinWindowOutlineCustomColorInactiveChanged();
+    void windowOutlineStyleActiveChanged();
+    void windowOutlineStyleInactiveChanged();
+    void windowOutlineCustomColorActiveChanged();
+    void windowOutlineCustomColorInactiveChanged();
     void updateLockIcons();
 
 Q_SIGNALS:
