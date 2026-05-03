@@ -50,6 +50,7 @@
         "Description[zh_TW]": "變更視窗裝飾外觀",
         "Icon": "preferences-system-windows",
         "Name": "Silver: Window Decoration",
+        "Name[fr]": "Silver: Décoration de fenêtre",
         "ServiceTypes": [
             "KCModule"
         ]

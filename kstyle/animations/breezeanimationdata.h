@@ -104,5 +104,4 @@ private:
     //* steps
     static int _steps;
 };
-
 }

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(silver)
-set(PROJECT_VERSION "6.5")
+set(PROJECT_VERSION "6.5.3")
 set(PROJECT_VERSION_MAJOR 6)
 
-add_definitions( -DSILVER_VERSION="${PROJECT_VERSION}" -DSILVER_GIT_MASTER=1)
+add_definitions( -DSILVER_VERSION="${PROJECT_VERSION}" -DSILVER_GIT_MASTER=0)
 
 set(KF6_MIN_VERSION "6.14.0")
 set(KDE_COMPILERSETTINGS_LEVEL "5.82")
@@ -18,6 +18,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH}  ${CMAKE_SOURCE_DI
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # We need this because we can't include KDECMakeSettings here, because that
 # would need KDEInstallDirs, which we can only include in the qt{5,6} builds
@@ -51,6 +52,7 @@ function(build_Qt6)
         set(HAVE_QTDBUS ${Qt6DBus_FOUND})
 
         option(WITH_DECORATIONS "Build Silver window decorations for KWin" ON)
+
 
         find_package(KF6FrameworkIntegration ${KF6_MIN_VERSION} CONFIG )
         set_package_properties(KF${QT_MAJOR_VERSION}FrameworkIntegration PROPERTIES
@@ -102,6 +104,13 @@ function(build_Qt6)
 
     if(WITH_DECORATIONS)
         find_package(KDecoration3 REQUIRED)
+
+        string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)" _ ${KDecoration3_VERSION})
+        set(KDECORATION_VERSION_MAJOR ${CMAKE_MATCH_1})
+        set(KDECORATION_VERSION_MINOR ${CMAKE_MATCH_2})
+        set(KDECORATION_VERSION_PATCH ${CMAKE_MATCH_3})
+        add_definitions( -DKDECORATION_VERSION_MAJOR=${KDECORATION_VERSION_MAJOR} -DKDECORATION_VERSION_MINOR=${KDECORATION_VERSION_MINOR} -DKDECORATION_VERSION_PATCH=${KDECORATION_VERSION_PATCH})
+
         add_subdirectory(kdecoration)
         add_subdirectory(icons)
         add_subdirectory(layout-templates)
@@ -138,6 +147,7 @@ add_subdirectory(colors)
 
 # add clang-format target for all our real source files
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES *.cpp *.h)
+list(FILTER ALL_CLANG_FORMAT_SOURCE_FILES EXCLUDE REGEX ".*\\.ccls-cache/.*")
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 kde_configure_git_pre_commit_hook(CHECKS CLANG_FORMAT)
 

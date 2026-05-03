@@ -220,5 +220,4 @@ void TileSet::render(const QRect &constRect, QPainter *painter, Tiles tiles) con
     // restore
     painter->setRenderHint(QPainter::SmoothPixmapTransform, oldHint);
 }
-
 }

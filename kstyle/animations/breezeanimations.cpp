@@ -236,5 +236,4 @@ void Animations::registerEngine(BaseEngine *engine)
     _engines.append(engine);
     connect(engine, &QObject::destroyed, this, &Animations::unregisterEngine);
 }
-
 }

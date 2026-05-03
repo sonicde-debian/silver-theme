@@ -10,12 +10,14 @@ set(breezecommon_LIB_SRCS
     presetsmodel.cpp
     renderdecorationbuttonicon.cpp
     renderdecorationbuttonicon18by18.cpp
+    styleark.cpp
     stylekisweet.cpp
-    stylekairn.cpp
-    stylekairnleft.cpp
+    stylearkopal.cpp
+    stylearkopalleft.cpp
     styleklasse.cpp
-    stylekite.cpp
+    stylesilver.cpp
     styleoxygen.cpp
+    stylesuessigsilver.cpp
     styletraditional.cpp
     stylemetro.cpp
     stylefluent.cpp

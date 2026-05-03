@@ -74,5 +74,4 @@ private:
     //* data map
     DataMap<HeaderViewData> _data;
 };
-
 }

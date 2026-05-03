@@ -26,5 +26,4 @@ struct PropertyNames {
     static const char statusBarSeparator[];
     static const char roundButton[];
 };
-
 }

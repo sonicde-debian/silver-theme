@@ -53,5 +53,4 @@ protected:
 private:
     std::shared_ptr<Helper> _helper;
 };
-
 }

@@ -2,5 +2,7 @@ install(FILES SilverDark.colors
         DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes/)
 install(FILES SilverLight.colors
         DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes/)
-install(FILES SilverTwilight.colors
+install(FILES OpalFruitsDark.colors
+        DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes/)
+install(FILES OpalFruitsLight.colors
         DESTINATION ${KDE_INSTALL_DATADIR}/color-schemes/)

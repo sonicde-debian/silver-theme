@@ -282,5 +282,4 @@ void TransitionWidget::fade(const QPixmap &source, QPixmap &target, qreal opacit
 
     p.end();
 }
-
 }

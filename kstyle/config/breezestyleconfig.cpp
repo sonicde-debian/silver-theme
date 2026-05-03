@@ -1,6 +1,7 @@
 /*
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
- * SPDX-FileCopyrightText: 2021 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2021-2025 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
@@ -59,13 +60,7 @@ StyleConfig::StyleConfig(QWidget *parent)
     _version->setText(QStringLiteral("v") + QStringLiteral(SILVER_VERSION) + QStringLiteral(".git"));
 
 #else
-    // set shortened version string in UI if an official release
-    QRegularExpression re("\\d+\\.\\d+");
-    QRegularExpressionMatch match = re.match(SILVER_VERSION);
-    if (match.hasMatch()) {
-        QString matched = match.captured(0);
-        _version->setText("v" + matched);
-    }
+    _version->setText(QStringLiteral("v") + QStringLiteral(SILVER_VERSION));
 #endif
 
     // add corner icon

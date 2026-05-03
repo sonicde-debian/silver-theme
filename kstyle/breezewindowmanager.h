@@ -294,5 +294,4 @@ T WindowManager::findParent(const QWidget *widget) const
 
     return nullptr;
 }
-
 }

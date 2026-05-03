@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2023 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: MIT
  */
@@ -172,7 +173,7 @@ private:
     // strings for UI corresponding to overridableButtonTypes
     const QHash<DecorationButtonType, QString> m_colorOverridableButtonTypesStrings{
         {DecorationButtonType::Close, i18n("Close")},
-        {DecorationButtonType::Maximize, i18n("Maximize/Restore")},
+        {DecorationButtonType::Maximize, i18n("Maximize/Float")},
         {DecorationButtonType::Minimize, i18n("Minimize")},
         {DecorationButtonType::ContextHelp, i18n("Help")},
         {DecorationButtonType::Shade, i18n("Shade")},

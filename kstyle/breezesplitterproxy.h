@@ -100,5 +100,4 @@ private:
     //* timer id
     int _timerId;
 };
-
 }

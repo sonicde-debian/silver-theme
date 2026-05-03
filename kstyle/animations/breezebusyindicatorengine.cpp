@@ -160,5 +160,4 @@ bool BusyIndicatorEngine::unregisterWidget(QObject *object)
 
     return removed;
 }
-
 }

@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2021 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -14,7 +15,7 @@ void RenderStyleFluent18By18::renderMaximizeIcon()
     renderSquareMaximizeIcon(false, 20);
 }
 
-void RenderStyleFluent18By18::renderRestoreIcon()
+void RenderStyleFluent18By18::renderFloatIcon()
 {
     renderOverlappingWindowsIcon(false, 20);
 }

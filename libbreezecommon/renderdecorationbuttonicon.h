@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2021-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -105,7 +106,7 @@ protected:
 
     virtual void renderCloseIcon() = 0;
     virtual void renderMaximizeIcon() = 0;
-    virtual void renderRestoreIcon() = 0;
+    virtual void renderFloatIcon() = 0;
     virtual void renderMinimizeIcon() = 0;
     virtual void renderPinnedOnAllDesktopsIcon() = 0;
     virtual void renderPinOnAllDesktopsIcon() = 0;
@@ -158,15 +159,15 @@ protected:
      * @param roundAtZero whether or not to round up or down at zero
      * @return the rounded number
      */
-    qreal roundCoordToHalf(qreal coord, const ThresholdRound roundAtZero);
+    qreal roundCoordToHalf(qreal coord, const ThresholdRound roundAtZero = ThresholdRound::Up);
 
     /**
      * @brief rounds the given number to the nearest whole
      * @param coord The number to round
-     * @param roundAtZero whether or not to round up or down at half
+     * @param roundAtHalf whether or not to round up or down at half
      * @return the rounded number
      */
-    qreal roundCoordToWhole(qreal coord, const ThresholdRound roundAtHalf);
+    qreal roundCoordToWhole(qreal coord, const ThresholdRound roundAtHalf = ThresholdRound::Up);
 
     enum class SnapPixel {
         ToHalf,
@@ -190,7 +191,6 @@ protected:
     /**
      * @brief Overrloaded function. Given a local point, snaps it to the nearest half or whole pixel boundary in device pixels, and returns an adjusted
      * equivalent local point This overloaded version automatically determines whether to snap to a half (if input is 0.5), or otherwise whole, pixel.
-     *        m_isOddPenWidth should be set before calling this function
      * @param pointLocal input point in local coordinates to snap
      * @return pixel-snapped equivalent in local logical coordinates
      *
@@ -218,7 +218,6 @@ protected:
     qreal straightLineOpacity();
 
     QPainter *m_painter;
-    bool m_isOddPenWidth = true;
     bool m_fromKstyle;
     bool m_boldButtonIcons;
     qreal m_devicePixelRatio; // unlike getting it directly from the paint device, this DPR is also set for X11, i.e. not just 1 on X11
@@ -234,5 +233,4 @@ protected:
     //* how much to factor the pen width for a bold square maximize button
     static constexpr qreal m_squareMaximizeBoldPenWidthFactor = 1.5;
 };
-
 }

@@ -1,7 +1,8 @@
 /*
  * SPDX-FileCopyrightText: 2014 Martin Gräßlin <mgraesslin@kde.org>
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
- * SPDX-FileCopyrightText: 2021-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2021-2026 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -67,9 +68,20 @@ Button::Button(KDecoration3::DecorationButtonType type, Decoration *decoration, 
     // connections
     connect(c, SIGNAL(iconChanged(QIcon)), this, SLOT(update()));
     connect(decoration, &Decoration::reconfigured, this, &Button::reconfigure);
-    connect(this, &KDecoration3::DecorationButton::hoveredChanged, this, &Button::updateAnimationState);
-    connect(this, &KDecoration3::DecorationButton::hoveredChanged, this, &Button::updateThinWindowOutlineWithButtonColor);
-    connect(this, &KDecoration3::DecorationButton::pressedChanged, this, &Button::updateThinWindowOutlineWithButtonColor);
+    connect(this, &KDecoration3::DecorationButton::hoveredChanged, this, [this, decoration](bool v) {
+        if (!decoration->internalSettings()->unisonHovering()) {
+            updateAnimationState(v);
+        }
+    });
+    connect(this, &KDecoration3::DecorationButton::hoveredChanged, this, &Button::updateWindowOutlineWithButtonColor);
+    connect(this, &KDecoration3::DecorationButton::pressedChanged, this, &Button::updateWindowOutlineWithButtonColor);
+
+    // for unison hovering
+    connect(decoration, &Decoration::buttonUnisonHoveredChanged, this, [this, decoration](bool v) {
+        if (decoration->internalSettings()->unisonHovering()) {
+            updateAnimationState(v);
+        }
+    });
 
     reconfigure();
 }
@@ -163,12 +175,13 @@ void Button::paint(QPainter *painter, const QRectF &repaintRegion)
 
     if (!m_smallButtonPaddedSize.isValid() || isStandAlone()) {
         m_smallButtonPaddedSize = geometry().size();
-        int iconWidth = qRound(qreal(m_smallButtonPaddedSize.width()) * 0.9);
-        setIconSize(QSize(iconWidth, iconWidth));
+        qreal iconWidth = qRound(qreal(m_smallButtonPaddedSize.width()) * 0.9);
+        setIconSize(QSizeF(iconWidth, iconWidth));
         setBackgroundVisibleSize(QSizeF(iconWidth, iconWidth));
     }
 
     painter->save();
+    painter->setRenderHints(QPainter::Antialiasing);
 
     // menu button (with application icon)
     if (type() == KDecoration3::DecorationButtonType::Menu) {
@@ -211,8 +224,6 @@ void Button::drawIcon(QPainter *painter) const
 {
     if (!m_d)
         return;
-
-    painter->setRenderHints(QPainter::Antialiasing);
 
     // for standalone/GTK we draw small buttons so don't do anything
     if (!(isStandAlone() || m_isGtkCsdButton)) {
@@ -335,7 +346,7 @@ QColor Button::foregroundColor(const bool getNonAnimatedColor) const
             return ColorTools::alphaMix(foregroundHover, m_opacity);
         } else
             return QColor();
-    } else if (isHovered()) {
+    } else if (this->hovered()) {
         return foregroundHoverActiveStateAnimated(active, getNonAnimatedColor);
     } else {
         return foregroundNormalActiveStateAnimated(active, getNonAnimatedColor);
@@ -432,7 +443,7 @@ QColor Button::backgroundColor(const bool getNonAnimatedColor) const
             return ColorTools::alphaMix(backgroundHover, m_opacity);
         } else
             return QColor();
-    } else if (isHovered()) {
+    } else if (this->hovered()) {
         return backgroundHoverActiveStateAnimated(active, getNonAnimatedColor);
     } else {
         return backgroundNormalActiveStateAnimated(active, getNonAnimatedColor);
@@ -528,7 +539,7 @@ QColor Button::outlineColor(const bool getNonAnimatedColor) const
             return ColorTools::alphaMix(outlineHover, m_opacity);
         } else
             return QColor();
-    } else if (isHovered()) {
+    } else if (this->hovered()) {
         return outlineHoverActiveStateAnimated(active, getNonAnimatedColor);
     } else {
         return outlineNormalActiveStateAnimated(active, getNonAnimatedColor);
@@ -602,9 +613,7 @@ bool Button::titlebarTextPinnedInversion() const
     bool active = c->isActive();
 
     return type() == KDecoration3::DecorationButtonType::OnAllDesktops
-        && m_d->internalSettings()->buttonIconStyle() != InternalSettings::EnumButtonIconStyle::StyleSystemIconTheme
-        && m_d->internalSettings()->buttonIconStyle() != InternalSettings::EnumButtonIconStyle::StyleKairn
-        && m_d->internalSettings()->buttonIconStyle() != InternalSettings::EnumButtonIconStyle::StyleKairnLeft
+        && m_d->internalSettings()->buttonIconStyle() == InternalSettings::EnumButtonIconStyle::StyleOxygen
         && (m_d->internalSettings()->buttonBackgroundOpacity(active) > 50 && m_d->internalSettings()->buttonIconOpacity(active) > 50
             && (((m_d->internalSettings()->buttonBackgroundColors(active) == InternalSettings::EnumButtonBackgroundColors::TitleBarText
                   || m_d->internalSettings()->buttonBackgroundColors(active) == InternalSettings::EnumButtonBackgroundColors::TitleBarTextNegativeClose)
@@ -649,9 +658,9 @@ void Button::updateAnimationState(bool hovered)
     }
 }
 
-void Button::updateThinWindowOutlineWithButtonColor(bool on)
+void Button::updateWindowOutlineWithButtonColor(bool on)
 {
-    if (!m_d || !m_d->internalSettings()->colorizeThinWindowOutlineWithButton() || isStandAlone())
+    if (!m_d || !m_d->internalSettings()->colorizeWindowOutlineWithButton() || isStandAlone())
         return;
 
     QColor color = QColor();
@@ -665,7 +674,7 @@ void Button::updateThinWindowOutlineWithButtonColor(bool on)
         color = this->outlineColor(true); // generate colour again in non-animated state
         if (!color.isValid())
             color = this->backgroundColor(true); // use a background colour if outline colour not valid
-        m_d->setThinWindowOutlineOverrideColor(on, color); // generate colour again in non-animated state
+        m_d->setWindowOutlineOverrideColor(on, color); // generate colour again in non-animated state
     } else {
         if (!isHovered() && isPressed())
             return; // don't remove the window outline highlight if the button is still pressed
@@ -682,7 +691,7 @@ void Button::updateThinWindowOutlineWithButtonColor(bool on)
             }
         }
 
-        m_d->setThinWindowOutlineOverrideColor(on, color);
+        m_d->setWindowOutlineOverrideColor(on, color);
     }
 }
 
@@ -700,7 +709,7 @@ void Button::paintFullHeightButtonBackground(QPainter *painter) const
 
     if (m_d->internalSettings()->buttonShape() != InternalSettings::EnumButtonShape::ShapeFullHeightRectangle) {
         if (m_d->internalSettings()->buttonCornerRadius() == InternalSettings::EnumButtonCornerRadius::Custom) {
-            cornerRadius = m_d->internalSettings()->buttonCustomCornerRadius() / 2.0f * m_d->settings()->smallSpacing();
+            cornerRadius = m_d->internalSettings()->buttonCustomCornerRadius() * m_d->x11Scale();
         } else {
             cornerRadius = m_d->scaledCornerRadius();
         }
@@ -720,10 +729,8 @@ void Button::paintFullHeightButtonBackground(QPainter *painter) const
 
     qreal penWidth = PenWidth::Symbol;
     qreal geometryShrinkOffsetHorizontal = PenWidth::Symbol * 1.5;
-    if (KWindowSystem::isPlatformX11()) {
-        penWidth *= m_devicePixelRatio;
-        geometryShrinkOffsetHorizontal *= m_devicePixelRatio;
-    }
+    penWidth *= m_devicePixelRatio;
+    geometryShrinkOffsetHorizontal *= m_devicePixelRatio;
 
     if (m_outlineColor.isValid()) {
         qreal geometryShrinkOffsetVertical = geometryShrinkOffsetHorizontal;
@@ -941,7 +948,6 @@ void Button::paintFullHeightButtonBackground(QPainter *painter) const
                 outline = outline.subtracted(inner);
             }
         } else { // plain rectangle
-
             // shrink the backgroundBoundingRect to make border more visible
             backgroundBoundingRect = backgroundBoundingRect.adjusted(geometryShrinkOffsetHorizontal,
                                                                      geometryShrinkOffsetVertical,
@@ -1038,9 +1044,7 @@ void Button::paintSmallSizedButtonBackground(QPainter *painter) const
     qreal backgroundSize = m_backgroundVisibleSize.width();
 
     qreal penWidth = m_isGtkCsdButton ? m_standardScaledNonCosmeticPenWidth : PenWidth::Symbol;
-    if (KWindowSystem::isPlatformX11()) {
-        penWidth *= m_devicePixelRatio;
-    }
+    penWidth *= m_devicePixelRatio;
 
     if (m_outlineColor.isValid()) {
         QPen pen(m_outlineColor);
@@ -1083,7 +1087,7 @@ void Button::paintSmallSizedButtonBackground(QPainter *painter) const
                || m_d->internalSettings()->buttonShape() == InternalSettings::EnumButtonShape::ShapeIntegratedRoundedRectangle // case where standalone
                || m_d->internalSettings()->buttonShape() == InternalSettings::EnumButtonShape::ShapeIntegratedRoundedRectangleGrouped // case where standalone
     ) {
-        qreal cornerRadiusScaled = cornerRadiusUnscaled / 2.0f * m_d->settings()->smallSpacing();
+        qreal cornerRadiusScaled = cornerRadiusUnscaled * m_d->x11Scale();
 
         if (m_outlineColor.isValid())
             geometryEnlargeOffset = penWidth / 2;
@@ -1111,8 +1115,7 @@ void Button::setDevicePixelRatio(QPainter *painter)
     m_devicePixelRatio = painter->device()->devicePixelRatioF();
 
     // on X11 Kwin just returns 1.0 for the DPR instead of the correct value, so use the scaling setting directly
-    if (KWindowSystem::isPlatformX11())
-        m_devicePixelRatio = m_d->systemScaleFactorX11();
+    m_devicePixelRatio = m_d->systemScaleFactorX11();
     if (m_isGtkCsdButton)
         m_devicePixelRatio = 1.0;
 }
@@ -1127,12 +1130,21 @@ void Button::setShouldDrawBoldButtonIcons()
 {
     if (!m_d)
         return;
+    auto c = m_d->window();
 
     m_boldButtonIcons = false;
 
     if (!m_isGtkCsdButton) {
         switch (m_d->internalSettings()->boldButtonIcons()) {
         default:
+            break;
+        case InternalSettings::EnumBoldButtonIcons::BoldIconsActiveHiDpi:
+            if ((c->isActive() || m_isGtkCsdButton) && m_devicePixelRatio > 1.2)
+                m_boldButtonIcons = true;
+            break;
+        case InternalSettings::EnumBoldButtonIcons::BoldIconsActive:
+            if (c->isActive() || m_isGtkCsdButton)
+                m_boldButtonIcons = true;
             break;
         case InternalSettings::EnumBoldButtonIcons::BoldIconsHiDpiOnly:
             // If HiDPI system scaling use bold icons
@@ -1160,6 +1172,17 @@ bool Button::isSystemIconAvailable() const
             return false;
         else
             return true;
+    }
+}
+
+bool Button::hovered() const // for unison hovering
+{
+    if (!m_d)
+        return false;
+    if (m_d->internalSettings()->unisonHovering()) {
+        return m_d->buttonUnisonHovered();
+    } else {
+        return isHovered();
     }
 }
 

@@ -83,5 +83,4 @@ private:
     DataMap<TabBarData> _hoverData;
     DataMap<TabBarData> _focusData;
 };
-
 }

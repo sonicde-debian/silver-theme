@@ -56,5 +56,4 @@ private:
     //* map event types to string
     QMap<QEvent::Type, QString> _eventTypes;
 };
-
 }

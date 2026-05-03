@@ -64,5 +64,4 @@ private:
     //* opacity variable
     qreal _opacity = 0;
 };
-
 }

@@ -1,5 +1,7 @@
 /*
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
+ * SPDX-FileCopyrightText: 2021-2025 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
@@ -14,6 +16,8 @@
 #if BREEZE_HAVE_KSTYLE
 #include <KStyle>
 #endif
+
+#include <KConfigWatcher>
 
 #include <QAbstractItemView>
 #include <QAbstractScrollArea>
@@ -401,7 +405,7 @@ private:
     void drawMainWindow(QPainter *painter, const QMainWindow *mw, const bool drawWindowBackground) const;
     void drawDialog(QPainter *painter, const QDialog *dialog, const bool drawDialogBackground) const;
     void drawToolsAreaSeparator(QPainter *painter, const QWidget *w) const;
-    void drawToolsAreaBackgroundAndSeparator(QPainter *painter, const QWidget *w, const QRect &rect, const bool drawBackground) const;
+    void drawToolsAreaBackgroundAndSeparator(QPainter *painter, const QWidget *w, const QRect &rect, const bool faintSeparator) const;
 
     //* create toolbar extension icon
     QIcon toolBarExtensionIcon(StandardPixmap, const QStyleOption *, const QWidget *) const;
@@ -510,6 +514,9 @@ private:
     QPointer<QFocusFrame> _focusFrame;
 
     std::shared_ptr<Helper> _helper;
+
+    //* config watcher for silver/silverrc
+    KConfigWatcher::Ptr _configWatcher;
 
     std::unique_ptr<ShadowHelper> _shadowHelper;
     std::unique_ptr<Animations> _animations;

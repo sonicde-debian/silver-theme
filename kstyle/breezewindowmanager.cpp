@@ -805,5 +805,4 @@ bool WindowManager::isDockWidgetTitle(const QWidget *widget) const
         return false;
     }
 }
-
 }

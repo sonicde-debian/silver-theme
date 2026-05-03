@@ -61,5 +61,4 @@ void setDebugOutput(const QString &rawTargetFilePath_)
     };
     qInstallMessageHandler(HelperClass::messageHandler);
 }
-
 }

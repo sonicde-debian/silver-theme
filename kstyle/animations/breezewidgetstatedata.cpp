@@ -29,5 +29,4 @@ bool WidgetStateData::updateState(bool value)
         return true;
     }
 }
-
 }

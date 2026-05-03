@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2023-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -39,6 +40,13 @@ void DecorationButtonPalette::generate(InternalSettingsPtr decorationSettings,
     }
 
     if (!(generateOneGroupOnly && oneGroupActiveState)) { // inactive
+        if (generateOneGroupOnly && !oneGroupActiveState
+            && decorationSettings->buttonColorsInactiveSameHoverPress()) { // always need to generate active if inactive uses active colours
+            decodeButtonOverrideColors(true);
+            generateButtonBackgroundPalette(true);
+            generateButtonForegroundPalette(true);
+            generateButtonOutlinePalette(true);
+        }
         decodeButtonOverrideColors(false);
         generateButtonBackgroundPalette(false);
         generateButtonForegroundPalette(false);
@@ -238,8 +246,27 @@ void DecorationButtonPalette::generateBistateColors(ButtonComponent component,
                                                     QColor baseColor,
                                                     QColor &bistate1,
                                                     QColor &bistate2,
-                                                    QColor accentHoverBase)
+                                                    QColor accentHoverBase,
+                                                    const bool replaceWithActiveHoverPress)
 {
+    if (replaceWithActiveHoverPress) {
+        switch (component) {
+        default:
+        case ButtonComponent::Background:
+            bistate1 = _active->backgroundHover;
+            bistate2 = _active->backgroundPress;
+            return;
+        case ButtonComponent::Icon:
+            bistate1 = _active->foregroundHover;
+            bistate2 = _active->foregroundPress;
+            return;
+        case ButtonComponent::Outline:
+            bistate1 = _active->outlineHover;
+            bistate2 = _active->outlinePress;
+            return;
+        }
+    }
+
     const DecorationPaletteGroup *decorationColors = active ? _decorationColorsActive : _decorationColorsInactive;
     bool isClose = _buttonType == DecorationButtonType::Close;
 
@@ -329,7 +356,8 @@ void DecorationButtonPalette::generateTristateColors(ButtonComponent component,
                                                      QColor &tristate1,
                                                      QColor &tristate2,
                                                      QColor &tristate3,
-                                                     QColor accentHoverBase)
+                                                     QColor accentHoverBase,
+                                                     const bool replaceWithActiveHoverPress)
 {
     const DecorationPaletteGroup *decorationColors = active ? _decorationColorsActive : _decorationColorsInactive;
     bool isClose = _buttonType == DecorationButtonType::Close;
@@ -361,69 +389,113 @@ void DecorationButtonPalette::generateTristateColors(ButtonComponent component,
     default:
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::No):
         tristate1 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
         tristate3 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::Opaque):
         tristate1 = ColorTools::alphaMix(baseColor, 0.6);
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
         tristate3 = ColorTools::alphaMix(baseColor, 1.8);
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::MostOpaqueHover):
         tristate1 = baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase : ColorTools::alphaMix(baseColor, 1.8);
         tristate3 = ColorTools::alphaMix(baseColor, 0.6);
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::Transparent):
         tristate1 = ColorTools::alphaMix(baseColor, 1.8);
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
         tristate3 = ColorTools::alphaMix(baseColor, 0.6);
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::MostTransparentHover):
         tristate1 = baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase : ColorTools::alphaMix(baseColor, 0.6);
         tristate3 = ColorTools::alphaMix(baseColor, 1.8);
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::Light):
         tristate1 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase.lighter(125) : baseColor.lighter(125);
         tristate3 = accentHoverBase.isValid() ? accentHoverBase.lighter() : baseColor.lighter();
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::LightestHover):
         tristate1 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase.lighter() : baseColor.lighter();
         tristate3 = accentHoverBase.isValid() ? accentHoverBase.lighter(125) : baseColor.lighter(125);
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::Dark):
         tristate1 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase.darker(100) : baseColor.darker(100);
         tristate3 = accentHoverBase.isValid() ? accentHoverBase.darker() : baseColor.darker();
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::DarkestHover):
         tristate1 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase.darker() : baseColor.darker();
         tristate3 = accentHoverBase.isValid() ? accentHoverBase.darker(100) : baseColor.darker(100);
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::MoreTitleBar):
         tristate1 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = KColorUtils::mix(decorationColors->titleBarBase, accentHoverBase.isValid() ? accentHoverBase : baseColor, 0.6);
         tristate3 = KColorUtils::mix(decorationColors->titleBarBase, accentHoverBase.isValid() ? accentHoverBase : baseColor, 0.3);
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::MostTitleBarHover):
         tristate1 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = KColorUtils::mix(decorationColors->titleBarBase, accentHoverBase.isValid() ? accentHoverBase : baseColor, 0.3);
         tristate3 = KColorUtils::mix(decorationColors->titleBarBase, accentHoverBase.isValid() ? accentHoverBase : baseColor, 0.6);
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::LessTitleBar):
         tristate1 = KColorUtils::mix(decorationColors->titleBarBase, accentHoverBase.isValid() ? accentHoverBase : baseColor, 0.3);
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = KColorUtils::mix(decorationColors->titleBarBase, accentHoverBase.isValid() ? accentHoverBase : baseColor, 0.6);
         tristate3 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
         break;
     case static_cast<int>(InternalSettings::EnumVaryColorBackground::LeastTitleBarHover):
         tristate1 = KColorUtils::mix(decorationColors->titleBarBase, accentHoverBase.isValid() ? accentHoverBase : baseColor, 0.3);
+        if (replaceWithActiveHoverPress)
+            break;
         tristate2 = accentHoverBase.isValid() ? accentHoverBase : baseColor;
         tristate3 = KColorUtils::mix(decorationColors->titleBarBase, accentHoverBase.isValid() ? accentHoverBase : baseColor, 0.6);
         break;
+    }
+
+    if (replaceWithActiveHoverPress) {
+        switch (component) {
+        default:
+        case ButtonComponent::Background:
+            tristate2 = _active->backgroundHover;
+            tristate3 = _active->backgroundPress;
+            break;
+        case ButtonComponent::Icon:
+            tristate2 = _active->foregroundHover;
+            tristate3 = _active->foregroundPress;
+            break;
+        case ButtonComponent::Outline:
+            tristate2 = _active->outlineHover;
+            tristate3 = _active->outlinePress;
+            break;
+        }
     }
 }
 
@@ -460,6 +532,8 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
     const bool &drawBackgroundOnPress = (_buttonType == DecorationButtonType::Close) ? _decorationSettings->showCloseBackgroundOnPress(active)
                                                                                      : _decorationSettings->showBackgroundOnPress(active);
 
+    const bool replaceWithActiveHoverPress = !active && _decorationSettings->buttonColorsInactiveSameHoverPress();
+
     QColor defaultButtonColor;
     QColor accentHoverBase;
     switch (buttonBackgroundColors) {
@@ -487,7 +561,14 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
             QColor tristate1, tristate2, tristate3;
             if (negativeCloseBackgroundHoverPress)
                 setDefaultBackgroundNormallyOnly = true;
-            generateTristateColors(ButtonComponent::Background, active, decorationColors->fullySaturatedNegative, tristate1, tristate2, tristate3);
+            generateTristateColors(ButtonComponent::Background,
+                                   active,
+                                   decorationColors->fullySaturatedNegative,
+                                   tristate1,
+                                   tristate2,
+                                   tristate3,
+                                   QColor(),
+                                   replaceWithActiveHoverPress);
             backgroundNormal = tristate1;
             if (drawBackgroundOnHover) {
                 backgroundHover = tristate2;
@@ -497,7 +578,13 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
             }
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Background, active, decorationColors->fullySaturatedNegative, bistate1, bistate2);
+            generateBistateColors(ButtonComponent::Background,
+                                  active,
+                                  decorationColors->fullySaturatedNegative,
+                                  bistate1,
+                                  bistate2,
+                                  QColor(),
+                                  replaceWithActiveHoverPress);
             if (drawBackgroundOnHover) {
                 backgroundHover = bistate1;
             }
@@ -511,7 +598,14 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
             QColor tristate1, tristate2, tristate3;
             if (negativeCloseBackgroundHoverPress)
                 setDefaultBackgroundNormallyOnly = true;
-            generateTristateColors(ButtonComponent::Background, active, decorationColors->neutral, tristate1, tristate2, tristate3);
+            generateTristateColors(ButtonComponent::Background,
+                                   active,
+                                   decorationColors->neutral,
+                                   tristate1,
+                                   tristate2,
+                                   tristate3,
+                                   QColor(),
+                                   replaceWithActiveHoverPress);
             backgroundNormal = tristate1;
             if (drawBackgroundOnHover)
                 backgroundHover = tristate2;
@@ -519,7 +613,7 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
                 backgroundPress = tristate3;
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Background, active, decorationColors->neutral, bistate1, bistate2);
+            generateBistateColors(ButtonComponent::Background, active, decorationColors->neutral, bistate1, bistate2, QColor(), replaceWithActiveHoverPress);
             if (drawBackgroundOnHover)
                 backgroundHover = bistate1;
             if (drawBackgroundOnPress)
@@ -531,7 +625,14 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
             QColor tristate1, tristate2, tristate3;
             if (negativeCloseBackgroundHoverPress)
                 setDefaultBackgroundNormallyOnly = true;
-            generateTristateColors(ButtonComponent::Background, active, decorationColors->positiveSaturated, tristate1, tristate2, tristate3);
+            generateTristateColors(ButtonComponent::Background,
+                                   active,
+                                   decorationColors->positiveSaturated,
+                                   tristate1,
+                                   tristate2,
+                                   tristate3,
+                                   QColor(),
+                                   replaceWithActiveHoverPress);
             backgroundNormal = tristate1;
             if (drawBackgroundOnHover)
                 backgroundHover = tristate2;
@@ -539,7 +640,13 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
                 backgroundPress = tristate3;
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Background, active, decorationColors->positiveSaturated, bistate1, bistate2);
+            generateBistateColors(ButtonComponent::Background,
+                                  active,
+                                  decorationColors->positiveSaturated,
+                                  bistate1,
+                                  bistate2,
+                                  QColor(),
+                                  replaceWithActiveHoverPress);
             if (drawBackgroundOnHover)
                 backgroundHover = bistate1;
             if (drawBackgroundOnPress)
@@ -550,7 +657,14 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
     if (defaultButton || setDefaultBackgroundNormallyOnly) {
         if (drawBackgroundNormally) {
             QColor tristate1, tristate2, tristate3;
-            generateTristateColors(ButtonComponent::Background, active, defaultButtonColor, tristate1, tristate2, tristate3, accentHoverBase);
+            generateTristateColors(ButtonComponent::Background,
+                                   active,
+                                   defaultButtonColor,
+                                   tristate1,
+                                   tristate2,
+                                   tristate3,
+                                   accentHoverBase,
+                                   replaceWithActiveHoverPress);
             backgroundNormal = tristate1;
             if (drawBackgroundOnHover && !setDefaultBackgroundNormallyOnly)
                 backgroundHover = tristate2;
@@ -558,7 +672,7 @@ void DecorationButtonPalette::generateButtonBackgroundPalette(const bool active)
                 backgroundPress = tristate3;
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Background, active, defaultButtonColor, bistate1, bistate2, accentHoverBase);
+            generateBistateColors(ButtonComponent::Background, active, defaultButtonColor, bistate1, bistate2, accentHoverBase, replaceWithActiveHoverPress);
             if (drawBackgroundOnHover && !setDefaultBackgroundNormallyOnly)
                 backgroundHover = bistate1;
             if (drawBackgroundOnPress && !setDefaultBackgroundNormallyOnly)
@@ -637,6 +751,8 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
             || buttonIconColors == InternalSettings::EnumButtonIconColors::AccentNegativeClose
             || buttonIconColors == InternalSettings::EnumButtonIconColors::AccentTrafficLights);
 
+    const bool replaceWithActiveHoverPress = !active && _decorationSettings->buttonColorsInactiveSameHoverPress();
+
     if (closeButtonIconColor != InternalSettings::EnumCloseButtonIconColor::AsSelected
         && ((_buttonType == DecorationButtonType::Close && negativeCloseBackground)
             || (negativeWhenHoverPress
@@ -647,40 +763,52 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
             if (drawIconNormally) {
                 foregroundNormal = Qt::GlobalColor::white;
                 if (drawIconOnHover)
-                    foregroundHover = Qt::GlobalColor::white;
+                    foregroundHover = replaceWithActiveHoverPress ? _active->foregroundHover : Qt::GlobalColor::white;
                 if (drawIconOnPress)
-                    foregroundPress = Qt::GlobalColor::white;
+                    foregroundPress = replaceWithActiveHoverPress ? _active->foregroundPress : Qt::GlobalColor::white;
             } else {
                 if (drawIconOnHover)
-                    foregroundHover = Qt::GlobalColor::white;
+                    foregroundHover = replaceWithActiveHoverPress ? _active->foregroundHover : Qt::GlobalColor::white;
                 if (drawIconOnPress)
-                    foregroundPress = Qt::GlobalColor::white;
+                    foregroundPress = replaceWithActiveHoverPress ? _active->foregroundPress : Qt::GlobalColor::white;
             }
 
         } else {
             if (closeButtonIconColor == InternalSettings::EnumCloseButtonIconColor::WhiteWhenHoverPress) {
                 if (drawIconOnHover)
-                    foregroundHover = Qt::GlobalColor::white;
+                    foregroundHover = replaceWithActiveHoverPress ? _active->foregroundHover : Qt::GlobalColor::white;
                 if (drawIconOnPress)
-                    foregroundPress = Qt::GlobalColor::white;
+                    foregroundPress = replaceWithActiveHoverPress ? _active->foregroundPress : Qt::GlobalColor::white;
             } else if (negativeWhenHoverPress) {
                 if (_buttonType == DecorationButtonType::Close) {
                     QColor bistate1, bistate2;
-                    generateBistateColors(ButtonComponent::Icon, active, decorationColors->negativeSaturated, bistate1, bistate2);
+                    generateBistateColors(ButtonComponent::Icon,
+                                          active,
+                                          decorationColors->negativeSaturated,
+                                          bistate1,
+                                          bistate2,
+                                          QColor(),
+                                          replaceWithActiveHoverPress);
                     if (drawIconOnHover)
                         foregroundHover = bistate1;
                     if (drawIconOnPress)
                         foregroundPress = bistate2;
                 } else if (_buttonType == DecorationButtonType::Maximize) {
                     QColor bistate1, bistate2;
-                    generateBistateColors(ButtonComponent::Icon, active, decorationColors->positiveSaturated, bistate1, bistate2);
+                    generateBistateColors(ButtonComponent::Icon,
+                                          active,
+                                          decorationColors->positiveSaturated,
+                                          bistate1,
+                                          bistate2,
+                                          QColor(),
+                                          replaceWithActiveHoverPress);
                     if (drawIconOnHover)
                         foregroundHover = bistate1;
                     if (drawIconOnPress)
                         foregroundPress = bistate2;
                 } else if (_buttonType == DecorationButtonType::Minimize) {
                     QColor bistate1, bistate2;
-                    generateBistateColors(ButtonComponent::Icon, active, decorationColors->neutral, bistate1, bistate2);
+                    generateBistateColors(ButtonComponent::Icon, active, decorationColors->neutral, bistate1, bistate2, QColor(), replaceWithActiveHoverPress);
                     if (drawIconOnHover)
                         foregroundHover = bistate1;
                     if (drawIconOnPress)
@@ -698,7 +826,14 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
             defaultButton = false;
             if (drawIconNormally) {
                 QColor tristate1, tristate2, tristate3;
-                generateTristateColors(ButtonComponent::Icon, active, decorationColors->negativeSaturated, tristate1, tristate2, tristate3);
+                generateTristateColors(ButtonComponent::Icon,
+                                       active,
+                                       decorationColors->negativeSaturated,
+                                       tristate1,
+                                       tristate2,
+                                       tristate3,
+                                       QColor(),
+                                       replaceWithActiveHoverPress);
                 if (!foregroundNormal.isValid())
                     foregroundNormal = tristate1;
                 if (drawIconOnHover && !foregroundHover.isValid())
@@ -707,7 +842,13 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
                     foregroundPress = tristate3;
             } else {
                 QColor bistate1, bistate2;
-                generateBistateColors(ButtonComponent::Icon, active, decorationColors->negativeSaturated, bistate1, bistate2);
+                generateBistateColors(ButtonComponent::Icon,
+                                      active,
+                                      decorationColors->negativeSaturated,
+                                      bistate1,
+                                      bistate2,
+                                      QColor(),
+                                      replaceWithActiveHoverPress);
                 if (drawIconOnHover && !foregroundHover.isValid())
                     foregroundHover = bistate1;
                 if (drawIconOnPress && !foregroundPress.isValid())
@@ -717,16 +858,29 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
             defaultButton = false;
             if (drawIconNormally) {
                 QColor tristate1, tristate2, tristate3;
-                generateTristateColors(ButtonComponent::Icon, active, decorationColors->positiveSaturated, tristate1, tristate2, tristate3);
+                generateTristateColors(ButtonComponent::Icon,
+                                       active,
+                                       decorationColors->positiveSaturated,
+                                       tristate1,
+                                       tristate2,
+                                       tristate3,
+                                       QColor(),
+                                       replaceWithActiveHoverPress);
                 if (!foregroundNormal.isValid())
-                    foregroundNormal = decorationColors->positiveSaturated;
+                    foregroundNormal = tristate1;
                 if (drawIconOnHover && !foregroundHover.isValid())
-                    foregroundHover = decorationColors->positiveSaturated;
+                    foregroundHover = tristate2;
                 if (drawIconOnPress && !foregroundPress.isValid())
-                    foregroundPress = decorationColors->positiveSaturated;
+                    foregroundPress = tristate3;
             } else {
                 QColor bistate1, bistate2;
-                generateBistateColors(ButtonComponent::Icon, active, decorationColors->positiveSaturated, bistate1, bistate2);
+                generateBistateColors(ButtonComponent::Icon,
+                                      active,
+                                      decorationColors->positiveSaturated,
+                                      bistate1,
+                                      bistate2,
+                                      QColor(),
+                                      replaceWithActiveHoverPress);
                 if (drawIconOnHover && !foregroundHover.isValid())
                     foregroundHover = bistate1;
                 if (drawIconOnPress && !foregroundPress.isValid())
@@ -736,7 +890,14 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
             defaultButton = false;
             if (drawIconNormally) {
                 QColor tristate1, tristate2, tristate3;
-                generateTristateColors(ButtonComponent::Icon, active, decorationColors->neutral, tristate1, tristate2, tristate3);
+                generateTristateColors(ButtonComponent::Icon,
+                                       active,
+                                       decorationColors->neutral,
+                                       tristate1,
+                                       tristate2,
+                                       tristate3,
+                                       QColor(),
+                                       replaceWithActiveHoverPress);
                 if (!foregroundNormal.isValid())
                     foregroundNormal = tristate1;
                 if (drawIconOnHover && !foregroundHover.isValid())
@@ -745,7 +906,7 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
                     foregroundPress = tristate3;
             } else {
                 QColor bistate1, bistate2;
-                generateBistateColors(ButtonComponent::Icon, active, decorationColors->neutral, bistate1, bistate2);
+                generateBistateColors(ButtonComponent::Icon, active, decorationColors->neutral, bistate1, bistate2, QColor(), replaceWithActiveHoverPress);
                 if (drawIconOnHover && !foregroundHover.isValid())
                     foregroundHover = bistate1;
                 if (drawIconOnPress && !foregroundPress.isValid())
@@ -771,7 +932,7 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
 
         if (drawIconNormally) {
             QColor tristate1, tristate2, tristate3;
-            generateTristateColors(ButtonComponent::Icon, active, defaultButtonColor, tristate1, tristate2, tristate3);
+            generateTristateColors(ButtonComponent::Icon, active, defaultButtonColor, tristate1, tristate2, tristate3, QColor(), replaceWithActiveHoverPress);
             if (!foregroundNormal.isValid())
                 foregroundNormal = tristate1;
             if (drawIconOnHover && !foregroundHover.isValid())
@@ -780,7 +941,7 @@ void DecorationButtonPalette::generateButtonForegroundPalette(const bool active)
                 foregroundPress = tristate3;
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Icon, active, defaultButtonColor, bistate1, bistate2);
+            generateBistateColors(ButtonComponent::Icon, active, defaultButtonColor, bistate1, bistate2, QColor(), replaceWithActiveHoverPress);
             if (drawIconOnHover && !foregroundHover.isValid())
                 foregroundHover = bistate1;
             if (drawIconOnPress && !foregroundPress.isValid())
@@ -874,6 +1035,8 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
     const bool &drawOutlineOnPress =
         (_buttonType == DecorationButtonType::Close) ? _decorationSettings->showCloseOutlineOnPress(active) : _decorationSettings->showOutlineOnPress(active);
 
+    const bool replaceWithActiveHoverPress = !active && _decorationSettings->buttonColorsInactiveSameHoverPress();
+
     QColor defaultOutlineColor;
     QColor accentHoverBase;
     switch (buttonBackgroundColors) {
@@ -901,7 +1064,14 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
             QColor tristate1, tristate2, tristate3;
             if (negativeCloseBackgroundHoverPress)
                 setDefaultOutlineNormallyOnly = true;
-            generateTristateColors(ButtonComponent::Outline, active, decorationColors->fullySaturatedNegative, tristate1, tristate2, tristate3);
+            generateTristateColors(ButtonComponent::Outline,
+                                   active,
+                                   decorationColors->fullySaturatedNegative,
+                                   tristate1,
+                                   tristate2,
+                                   tristate3,
+                                   QColor(),
+                                   replaceWithActiveHoverPress);
             outlineNormal = tristate1;
             if (drawOutlineOnHover)
                 outlineHover = tristate2;
@@ -909,7 +1079,13 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
                 outlinePress = tristate3;
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Outline, active, decorationColors->fullySaturatedNegative, bistate1, bistate2);
+            generateBistateColors(ButtonComponent::Outline,
+                                  active,
+                                  decorationColors->fullySaturatedNegative,
+                                  bistate1,
+                                  bistate2,
+                                  QColor(),
+                                  replaceWithActiveHoverPress);
             if (drawOutlineOnHover)
                 outlineHover = bistate1;
             if (drawOutlineOnPress)
@@ -921,7 +1097,14 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
             QColor tristate1, tristate2, tristate3;
             if (negativeCloseBackgroundHoverPress)
                 setDefaultOutlineNormallyOnly = true;
-            generateTristateColors(ButtonComponent::Outline, active, decorationColors->neutral, tristate1, tristate2, tristate3);
+            generateTristateColors(ButtonComponent::Outline,
+                                   active,
+                                   decorationColors->neutral,
+                                   tristate1,
+                                   tristate2,
+                                   tristate3,
+                                   QColor(),
+                                   replaceWithActiveHoverPress);
             outlineNormal = tristate1;
             if (drawOutlineOnHover)
                 outlineHover = tristate2;
@@ -929,7 +1112,7 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
                 outlinePress = tristate3;
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Outline, active, decorationColors->neutral, bistate1, bistate2);
+            generateBistateColors(ButtonComponent::Outline, active, decorationColors->neutral, bistate1, bistate2, QColor(), replaceWithActiveHoverPress);
             if (drawOutlineOnHover)
                 outlineHover = bistate1;
             if (drawOutlineOnPress)
@@ -941,7 +1124,14 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
             QColor tristate1, tristate2, tristate3;
             if (negativeCloseBackgroundHoverPress)
                 setDefaultOutlineNormallyOnly = true;
-            generateTristateColors(ButtonComponent::Outline, active, decorationColors->positiveSaturated, tristate1, tristate2, tristate3);
+            generateTristateColors(ButtonComponent::Outline,
+                                   active,
+                                   decorationColors->positiveSaturated,
+                                   tristate1,
+                                   tristate2,
+                                   tristate3,
+                                   QColor(),
+                                   replaceWithActiveHoverPress);
             outlineNormal = tristate1;
             if (drawOutlineOnHover)
                 outlineHover = tristate2;
@@ -949,7 +1139,13 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
                 outlinePress = tristate3;
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Outline, active, decorationColors->positiveSaturated, bistate1, bistate2);
+            generateBistateColors(ButtonComponent::Outline,
+                                  active,
+                                  decorationColors->positiveSaturated,
+                                  bistate1,
+                                  bistate2,
+                                  QColor(),
+                                  replaceWithActiveHoverPress);
             if (drawOutlineOnHover)
                 outlineHover = bistate1;
             if (drawOutlineOnPress)
@@ -960,7 +1156,14 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
     if (defaultButton || setDefaultOutlineNormallyOnly) {
         if (drawOutlineNormally) {
             QColor tristate1, tristate2, tristate3;
-            generateTristateColors(ButtonComponent::Outline, active, defaultOutlineColor, tristate1, tristate2, tristate3, accentHoverBase);
+            generateTristateColors(ButtonComponent::Outline,
+                                   active,
+                                   defaultOutlineColor,
+                                   tristate1,
+                                   tristate2,
+                                   tristate3,
+                                   accentHoverBase,
+                                   replaceWithActiveHoverPress);
             outlineNormal = tristate1;
             if (drawOutlineOnHover && !setDefaultOutlineNormallyOnly)
                 outlineHover = tristate2;
@@ -968,7 +1171,7 @@ void DecorationButtonPalette::generateButtonOutlinePalette(const bool active)
                 outlinePress = tristate3;
         } else {
             QColor bistate1, bistate2;
-            generateBistateColors(ButtonComponent::Outline, active, defaultOutlineColor, bistate1, bistate2, accentHoverBase);
+            generateBistateColors(ButtonComponent::Outline, active, defaultOutlineColor, bistate1, bistate2, accentHoverBase, replaceWithActiveHoverPress);
             if (drawOutlineOnHover && !setDefaultOutlineNormallyOnly)
                 outlineHover = bistate1;
             if (drawOutlineOnPress && !setDefaultOutlineNormallyOnly)

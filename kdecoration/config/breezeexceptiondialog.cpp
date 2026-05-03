@@ -3,7 +3,8 @@
 // -------------------
 //
 // SPDX-FileCopyrightText: 2009 Hugo Pereira Da Costa <hugo.pereira@free.fr>
-// SPDX-FileCopyrightText: 2023-2024 Paul A McAuley <kde@paulmcauley.com>
+// SPDX-FileCopyrightText: 2023-2026 Paul A McAuley <kde@paulmcauley.com>
+// SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell @gmail.com>
 //
 // SPDX-License-Identifier: MIT
 //////////////////////////////////////////////////////////////////////////////
@@ -35,6 +36,7 @@ ExceptionDialog::ExceptionDialog(KSharedConfig::Ptr config, KSharedConfig::Ptr p
         m_ui.exceptionWindowPropertyType->setDisabled(true);
         m_ui.hideTitleBar->setDisabled(true);
         m_ui.opaqueTitleBar->setDisabled(true);
+        m_ui.exceptionMatchTitleBarToApplicationColor->setDisabled(true);
         m_ui.preventApplyOpacityToHeader->setDisabled(true);
         m_ui.exceptionPresetCheckBox->setDisabled(true);
         m_ui.exceptionPresetComboBox->setDisabled(true);
@@ -62,8 +64,13 @@ ExceptionDialog::ExceptionDialog(KSharedConfig::Ptr config, KSharedConfig::Ptr p
     connect(m_ui.exceptionWindowPropertyEditor, &QLineEdit::textChanged, this, &ExceptionDialog::updateChanged, Qt::ConnectionType::DirectConnection);
     connect(m_ui.borderSizeComboBox, SIGNAL(currentIndexChanged(int)), SLOT(updateChanged()), Qt::ConnectionType::DirectConnection);
     connect(m_ui.borderSizeCheckBox, &QAbstractButton::clicked, this, &ExceptionDialog::updateChanged, Qt::ConnectionType::DirectConnection);
-    connect(m_ui.hideTitleBar, &QAbstractButton::clicked, this, &ExceptionDialog::updateChanged, Qt::ConnectionType::DirectConnection);
+    connect(m_ui.hideTitleBar, SIGNAL(currentIndexChanged(int)), SLOT(updateChanged()), Qt::ConnectionType::DirectConnection);
     connect(m_ui.opaqueTitleBar, &QAbstractButton::clicked, this, &ExceptionDialog::updateChanged, Qt::ConnectionType::DirectConnection);
+    connect(m_ui.exceptionMatchTitleBarToApplicationColor,
+            &QAbstractButton::clicked,
+            this,
+            &ExceptionDialog::updateChanged,
+            Qt::ConnectionType::DirectConnection);
     connect(m_ui.preventApplyOpacityToHeader, &QAbstractButton::clicked, this, &ExceptionDialog::updateChanged, Qt::ConnectionType::DirectConnection);
     connect(m_ui.exceptionPresetCheckBox, &QAbstractButton::clicked, this, &ExceptionDialog::updateChanged, Qt::ConnectionType::DirectConnection);
     connect(m_ui.exceptionPresetComboBox, SIGNAL(currentIndexChanged(int)), SLOT(updateChanged()), Qt::ConnectionType::DirectConnection);
@@ -95,8 +102,9 @@ void ExceptionDialog::setException(InternalSettingsPtr exception)
     }
 
     m_ui.borderSizeComboBox->setCurrentIndex(m_exception->borderSize());
-    m_ui.hideTitleBar->setChecked(m_exception->hideTitleBar());
+    m_ui.hideTitleBar->setCurrentIndex(m_exception->hideTitleBar());
     m_ui.opaqueTitleBar->setChecked(m_exception->opaqueTitleBar());
+    m_ui.exceptionMatchTitleBarToApplicationColor->setChecked(m_exception->exceptionMatchTitleBarToApplicationColor());
     m_ui.preventApplyOpacityToHeader->setChecked(m_exception->preventApplyOpacityToHeader());
     m_ui.borderSizeCheckBox->setChecked(m_exception->exceptionBorder());
 
@@ -118,8 +126,9 @@ void ExceptionDialog::save()
     }
 
     m_exception->setBorderSize(m_ui.borderSizeComboBox->currentIndex());
-    m_exception->setHideTitleBar(m_ui.hideTitleBar->isChecked());
+    m_exception->setHideTitleBar(m_ui.hideTitleBar->currentIndex());
     m_exception->setOpaqueTitleBar(m_ui.opaqueTitleBar->isChecked());
+    m_exception->setExceptionMatchTitleBarToApplicationColor(m_ui.exceptionMatchTitleBarToApplicationColor->isChecked());
     m_exception->setPreventApplyOpacityToHeader(m_ui.preventApplyOpacityToHeader->isChecked());
     m_exception->setExceptionBorder(m_ui.borderSizeCheckBox->isChecked());
 
@@ -141,9 +150,11 @@ void ExceptionDialog::updateChanged()
         modified = true;
     else if (m_exception->borderSize() != m_ui.borderSizeComboBox->currentIndex())
         modified = true;
-    else if (m_exception->hideTitleBar() != m_ui.hideTitleBar->isChecked())
+    else if (m_exception->hideTitleBar() != m_ui.hideTitleBar->currentIndex())
         modified = true;
     else if (m_exception->opaqueTitleBar() != m_ui.opaqueTitleBar->isChecked())
+        modified = true;
+    else if (m_exception->exceptionMatchTitleBarToApplicationColor() != m_ui.exceptionMatchTitleBarToApplicationColor->isChecked())
         modified = true;
     else if (m_exception->preventApplyOpacityToHeader() != m_ui.preventApplyOpacityToHeader->isChecked())
         modified = true;
@@ -192,7 +203,6 @@ void ExceptionDialog::readWindowProperties(bool valid)
     delete m_detectDialog;
     m_detectDialog = nullptr;
 }
-
 void ExceptionDialog::onOpaqueTitleBarToggled(bool toggled)
 {
     if (toggled) {

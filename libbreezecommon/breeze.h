@@ -1,6 +1,7 @@
 /*
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
  * SPDX-FileCopyrightText: 2022 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -118,12 +119,13 @@ static QStringList windecoExceptionKeys = {
     QStringLiteral("ExceptionProgramNamePattern"),
     QStringLiteral("ExceptionWindowPropertyPattern"),
     QStringLiteral("ExceptionWindowPropertyType"),
+    QStringLiteral("ExceptionPreset"),
     QStringLiteral("HideTitleBar"),
     QStringLiteral("OpaqueTitleBar"),
-    QStringLiteral("PreventApplyOpacityToHeader"),
+    QStringLiteral("ExceptionMatchTitleBarToApplicationColor"),
     QStringLiteral("ExceptionBorder"),
     QStringLiteral("BorderSize"),
-    QStringLiteral("ExceptionPreset"),
+    QStringLiteral("PreventApplyOpacityToHeader"),
 };
 
 // KDECORATION-------------------------------------------------------------

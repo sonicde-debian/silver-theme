@@ -49,11 +49,12 @@ include_directories(${CMAKE_SOURCE_DIR}/libbreezecommon)
 include_directories(${CMAKE_BINARY_DIR}/libbreezecommon6)
 
 
-set(breeze_settings_SOURCES
+set(silver_settings_SOURCES
     main.cpp
     systemicongenerator.cpp
+    silver-settings.qrc
 )
-add_executable(silver-settings ${breeze_settings_SOURCES} )
+add_executable(silver-settings ${silver_settings_SOURCES} )
 target_link_libraries(silver-settings Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Svg Qt6::Xml)
 target_link_libraries(silver-settings KF6::I18n KF6::KCMUtils KF6::CoreAddons)
 target_link_libraries(silver-settings silvercommon6)

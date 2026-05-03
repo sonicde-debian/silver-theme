@@ -1,6 +1,7 @@
 /*
  * SPDX-FileCopyrightText: 2014 Hugo Pereira Da Costa <hugo.pereira@free.fr>
- * SPDX-FileCopyrightText: 2022-2024 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2022-2026 Paul A McAuley <kde@paulmcauley.com>
+ * SPDX-FileCopyrightText: 2026 Joseph Crowell <joseph.w.crowell@gmail.com>
  *
  * SPDX-License-Identifier: GPL-2.0-only OR GPL-3.0-only OR LicenseRef-KDE-Accepted-GPL
  */
@@ -66,7 +67,7 @@ InternalSettingsPtr DecorationSettingsProvider::internalSettings()
             continue;
 
         // check matching
-        QRegularExpression rx(internalSettings->exceptionProgramNamePattern());
+        QRegularExpression rx(internalSettings->exceptionProgramNamePattern(), QRegularExpression::MultilineOption);
         if (rx.match(qAppName()).hasMatch()) {
             // load window decoration preset if set
             if (!internalSettings->exceptionPreset().isEmpty()) {
@@ -85,6 +86,10 @@ InternalSettingsPtr DecorationSettingsProvider::internalSettings()
             }
             if (internalSettings->opaqueTitleBar()) {
                 internalSettings->setProperty("noCacheException", true);
+            }
+            if (internalSettings->exceptionMatchTitleBarToApplicationColor()) {
+                internalSettings->setProperty("noCacheException", true);
+                internalSettings->setMatchTitleBarToApplicationColor(true);
             }
             return internalSettings;
         }
